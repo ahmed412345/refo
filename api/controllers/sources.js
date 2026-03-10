@@ -1,5 +1,7 @@
 import Source from "../models/Source.js";
 
+import UserSource from "../models/UserSource.js";
+
 export const getSources = async (req, res) => {
     // 1. استخراج معاملات الفلترة والصفحة من الـ Query
     const { page = 1, author, year, category, search } = req.query;
@@ -29,6 +31,7 @@ export const getSources = async (req, res) => {
     if (search) {
         query.$or = [{ title: { $regex: search, $options: "i" } }, { Summary: { $regex: search, $options: "i" } }];
     }
+
     // 3. التنفيذ: نطبق الفلترة ثم الـ Pagination
     const result = await Source.find(query)
         .sort({ createdAt: -1 }) // ترتيب الأحدث أولاً
@@ -43,5 +46,15 @@ export const getSources = async (req, res) => {
         totalPages: Math.ceil(total / limit),
         totalItems: total,
         currentPage: parseInt(page),
+    });
+};
+
+export const addSrcFromUser = async (req, res) => {
+    const data = req.body;
+
+    const result = await UserSource.create(data);
+
+    res.json({
+        result,
     });
 };
