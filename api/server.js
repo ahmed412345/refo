@@ -10,6 +10,10 @@ import sourcesRouter from "./routes/scource.route.js";
 
 import aiRouter from "./routes/ai.route.js";
 
+import cors from "cors";
+
+app.use(cors());
+
 app.use(express.json());
 
 app.use("/api", sourcesRouter);
