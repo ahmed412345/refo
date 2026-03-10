@@ -39,7 +39,7 @@ const AI = () => {
         <aside className="w-full lg:w-90 shrink-0 order-0 lg:order-2">
             <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 h-fit">
                 <div className="mb-6">
-                    <h2 className="font-bold text-lg w-full text-left" >Bloom</h2>
+                    <h2 className="font-bold text-lg w-full text-left">Bloom</h2>
                 </div>
 
                 <div className="max-h-[50vh] md:max-h-[70vh] flex flex-col gap-4 overflow-y-auto p-4">

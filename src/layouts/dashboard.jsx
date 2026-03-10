@@ -1,33 +1,57 @@
 import { useEffect, useState, useRef } from "react";
-import { Menu, X, Waypoints, Plus, Search } from "lucide-react";
+import { Menu, X, Waypoints, Plus, Search, Filter } from "lucide-react";
 import AI from "../components/AI";
 import { getSources } from "../services/getSources";
+import SourceDetailsPopup from "../components/sourcePop";
+import AdvancedSearchPopup from "../components/advancedSearch";
+import AddNewSource from "../components/addNewSource";
 
 const DashBoard = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isAdvSearchOpen, setIsAdvSearchOpen] = useState(false);
     const [sources, setSources] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [selectedSource, setSelectedSource] = useState(null);
 
-    // استخدام useRef لتتبع الصفحة وإجمالي الصفحات دون إعادة Render غير ضروري
+    // حالات البحث والتصنيف
+    const [searchValue, setSearchValue] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [category, setCategory] = useState("");
+
     const pageRef = useRef(1);
     const totalPagesRef = useRef(1);
 
-    const fetchSources = async (isLoadMore = false) => {
+    // Debounce للبحث
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchValue);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchValue]);
+
+    const fetchSources = async (isLoadMore = false, advFilters = null) => {
+        setIsMenuOpen(false);
+        setIsAdvSearchOpen(false); // إغلاق الـ popup عند البحث
+
         if (loading) return;
         setLoading(true);
         try {
-            const result = await getSources(pageRef.current);
+            // إذا كان هناك بحث متقدم، نستخدم قيمه، وإلا نستخدم الحالات العادية
+            const search = advFilters ? advFilters.search : debouncedSearch;
+            const cat = advFilters ? advFilters.category : category;
+            const year = advFilters ? advFilters.year : "";
+            const author = advFilters ? advFilters.author : "";
+
+            const result = await getSources(pageRef.current, search, cat, year, author);
             totalPagesRef.current = result.totalPages;
 
             setSources(prev => {
                 if (isLoadMore && prev) {
-                    // دمج النتائج القديمة مع الجديدة
                     return {
                         ...result,
                         result: [...prev.result, ...result.result],
                     };
                 }
-                // في حالة التحميل الأول، استبدل النتائج
                 return result;
             });
         } catch (e) {
@@ -38,8 +62,9 @@ const DashBoard = () => {
     };
 
     useEffect(() => {
+        pageRef.current = 1;
         fetchSources(false);
-    }, []);
+    }, [debouncedSearch, category]);
 
     const handleLoadMore = () => {
         if (pageRef.current < totalPagesRef.current) {
@@ -49,7 +74,7 @@ const DashBoard = () => {
     };
 
     return (
-        <div className="min-h-screen  bg-background text-text flex flex-col md:flex-row font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-background text-text flex flex-col md:flex-row font-sans overflow-x-hidden">
             {/* Sidebar */}
             <div className={`${isMenuOpen ? "block" : "hidden"} absolute inset-0 bg-black opacity-65 z-10`}></div>
             <nav
@@ -70,33 +95,59 @@ const DashBoard = () => {
                 </div>
 
                 <ul className={`${isMenuOpen ? "flex" : "hidden"} md:hidden md:group-hover:flex gap-4 flex-col items-center md:items-start`}>
-                    <li className="border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300">
-                        التاثير النفسي والسلوكي
+                    <li
+                        onClick={() => setCategory("")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        عرض الكل
                     </li>
-                    <li className="border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300">
+                    <li
+                        onClick={() => setCategory("التأثير النفسي والسلوكي")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "التأثير النفسي والسلوكي" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        التأثير النفسي والسلوكي
+                    </li>
+                    <li
+                        onClick={() => setCategory("الديناميكيات الاجتماعية والعلاقات الأسرية")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الديناميكيات الاجتماعية والعلاقات الأسرية" ? "bg-accent2 text-white" : ""}`}
+                    >
                         الديناميكيات الأجتماعية والعلاقات الأسرية
                     </li>
-                    <li className="border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300">
-                        الأليات والظواهر الرقمية
+                    <li
+                        onClick={() => setCategory("الآليات والظواهر الرقمية")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الآليات والظواهر الرقمية" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        الآليات والظواهر الرقمية
                     </li>
-                    <li className="border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300">
+                    <li
+                        onClick={() => setCategory("الاستراتيجيات والحلول")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الاستراتيجيات والحلول" ? "bg-accent2 text-white" : ""}`}
+                    >
                         الاستراتيجيات والحلول
                     </li>
                 </ul>
 
                 <div className={`${isMenuOpen ? "flex" : "hidden"} md:flex flex-col items-center`}>
-                    <div className="bg-accent hover:bg-gray-400 duration-300 text-white p-3 rounded-2xl shadow-lg cursor-pointer">
-                        <Plus size={24} className="cursor-pointer transition-colors" />
-                    </div>
+                    <AddNewSource></AddNewSource>
                 </div>
             </nav>
 
             {/* Main Content Area */}
-            <main className=" flex-1 md:mr-15 p-4 md:p-8 flex flex-col lg:flex-row gap-8 min-w-0">
+            <main className="flex-1 md:mr-15 p-4 md:p-8 flex flex-col lg:flex-row gap-8 min-w-0">
                 <section className="flex-1 min-w-0 order-1">
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center px-6 mb-8">
-                        <Search size={20} className="text-gray-400 mr-4" />
-                        <input id="searchBar" className="bg-transparent flex-1 outline-none text-lg min-w-12.5" placeholder="ابحث في المصادر..." />
+                        <Search size={20} className="text-gray-400 md:mr-4" />
+                        <input
+                            id="searchBar"
+                            className="bg-transparent flex-1 outline-none text-lg min-w-12.5"
+                            placeholder="ابحث في المصادر..."
+                            value={searchValue}
+                            onChange={e => setSearchValue(e.target.value)}
+                        />
+                        {/* زر فتح البحث المتقدم */}
+                        <button onClick={() => setIsAdvSearchOpen(true)} className="md:ml-4 text-gray-400 hover:text-accent">
+                            <Filter size={20} />
+                        </button>
                     </div>
 
                     <div className="flex justify-between items-center mb-6">
@@ -109,7 +160,8 @@ const DashBoard = () => {
                                 {sources.result.map((item, index) => (
                                     <div
                                         key={`${item._id}-${index}`}
-                                        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-all flex items-start gap-4"
+                                        onClick={() => setSelectedSource(item)}
+                                        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-all flex items-start gap-4 cursor-pointer"
                                     >
                                         <div className="min-w-0 flex-1">
                                             <h3 className="font-semibold text-lg text-gray-800 truncate">{item.title}</h3>
@@ -120,13 +172,11 @@ const DashBoard = () => {
                                         </div>
                                     </div>
                                 ))}
-
-                                {/* زر تحميل المزيد */}
                                 {pageRef.current < totalPagesRef.current && (
                                     <button
                                         onClick={handleLoadMore}
                                         disabled={loading}
-                                        className="w-full py-3 bg-accent text-white rounded-xl hover:bg-accent2 transition-colors font-bold"
+                                        className="w-full py-3 cursor-pointer bg-accent text-white rounded-xl hover:bg-accent2 transition-colors font-bold"
                                     >
                                         {loading ? "جاري التحميل..." : "عرض المزيد من المصادر"}
                                     </button>
@@ -139,6 +189,16 @@ const DashBoard = () => {
                 </section>
                 <AI />
             </main>
+
+            {/* Popups */}
+            {isAdvSearchOpen && (
+                <AdvancedSearchPopup
+                    onClose={() => setIsAdvSearchOpen(false)}
+                    onSearch={filters => fetchSources(false, filters)}
+                    setSearchValue={setSearchValue}
+                />
+            )}
+            {selectedSource && <SourceDetailsPopup source={selectedSource} onClose={() => setSelectedSource(null)} />}
         </div>
     );
 };
