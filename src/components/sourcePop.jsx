@@ -16,7 +16,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p className="text-sm text-gray-500">
                         {source.Author} | {source.Year}
                     </p>
-                    <span className="px-2 py-1 rounded-2xl text-sm text-white bg-accent">{source.Category}</span>
+                    <span className="px-2 py-1 min-w-22.5 rounded-2xl text-sm text-white bg-accent">{source.Category}</span>
                 </div>
 
                 <div className="prose max-w-none text-gray-700 mb-8">
