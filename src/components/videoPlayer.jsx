@@ -2,10 +2,7 @@ import { useState } from "react";
 import "plyr/dist/plyr.css";
 import { Plyr } from "plyr-react";
 
-
-
 const YoutubePlayer = ({ videoId, player, setplayer }) => {
-
     // إعدادات مصدر الفيديو
     const videoSource = {
         type: "video",
@@ -32,14 +29,6 @@ const YoutubePlayer = ({ videoId, player, setplayer }) => {
 
     return (
         <>
-            {/* الزر الذي يفتح النافذة المنبثقة */}
-            <button
-                onClick={() => setplayer(true)}
-                className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-all transform hover:scale-105 shadow-lg"
-            >
-                عرض الفيديو
-            </button>
-
             {/* النافذة المنبثقة (Pop-up Overlay) */}
             {player && (
                 <div
