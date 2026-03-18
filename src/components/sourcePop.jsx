@@ -18,7 +18,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     {/* زر الإغلاق: الآن fixed وفي أقصى اليمين العلوي للشاشة */}
                     <button
                         onClick={() => setPlayer(false)}
-                        className="fixed top-6 right-6 z-110 text-white/70 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full"
+                        className="fixed top-6 right-6 cursor-pointer z-110 text-white/70 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full"
                         title="إغلاق الفيديو"
                     >
                         <X size={35} strokeWidth={2.5} />
@@ -38,12 +38,12 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                 {/* زر إغلاق نافذة التفاصيل */}
                 <button
                     onClick={onClose}
-                    className="absolute cursor-pointer top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+                    className="absolute cursor-pointer top-3 right-3 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
                 >
                     <X size={24} />
                 </button>
 
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 mt-4">{source.title}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 mt-5">{source.title}</h2>
 
                 <div className="flex items-center justify-between mb-6">
                     <p className="text-sm text-gray-500">
