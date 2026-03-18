@@ -78,7 +78,7 @@ const DashBoard = () => {
             {/* Sidebar */}
             <div className={`${isMenuOpen ? "block" : "hidden"} absolute inset-0 bg-black opacity-65 z-10`}></div>
             <nav
-                className={`shadow-lg shadow-black/20 bg-white border-r group gap-3 md:fixed bottom-0 top-0 border-gray-200 p-2 flex justify-between ${isMenuOpen ? "flex-col absolute left-0 right-0" : "flex-row"} md:flex-col md:min-w-20 md:py-8 shrink-0 z-50`}
+                className={`shadow-lg shadow-black/20 bg-white border-r group gap-3 md:fixed bottom-0 top-0 border-gray-200 p-2 flex justify-between ${isMenuOpen ? "flex-col fixed left-0 right-0" : "flex-row"} md:flex-col md:min-w-20 md:py-8 shrink-0 z-50`}
             >
                 <div className="flex w-full justify-center">
                     <div className="flex items-center justify-center">
@@ -168,10 +168,10 @@ const DashBoard = () => {
 
                     {/* الآثار */}
                     <li
-                        onClick={() => setCategory("الآثار")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الآثار" ? "bg-accent2 text-white" : ""}`}
+                        onClick={() => setCategory("الإعلام")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الإعلام" ? "bg-accent2 text-white" : ""}`}
                     >
-                        الآثار
+                        الإعلام
                     </li>
                 </ul>
 

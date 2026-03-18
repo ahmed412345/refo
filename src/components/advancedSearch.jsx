@@ -59,7 +59,7 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
                         <option value="الوثائق والمكتبات">الوثائق والمكتبات والمعلومات</option>
 
                         {/* الآثار */}
-                        <option value="الآثار">الآثار</option>
+                        <option value="الإعلام">الإعلام</option>
                     </select>
                     <input
                         placeholder="السنة"
