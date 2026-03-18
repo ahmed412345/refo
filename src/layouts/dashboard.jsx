@@ -216,7 +216,7 @@ const DashBoard = () => {
                                                 <p className="text-sm text-gray-500">
                                                     {item.Author} | {item.Year}
                                                 </p>
-                                                <span className="px-5 py-3 text-sm text-white bg-accent">{item.Category}</span>
+                                                <span className="px-2 py-1 rounded-2xl text-sm text-white bg-accent">{item.Category}</span>
                                             </div>
                                             <p className="text-sm text-gray-600 mt-2 line-clamp-2">{item.Summary}</p>
                                         </div>
