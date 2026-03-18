@@ -12,21 +12,23 @@ const SourceDetailsPopup = ({ source, onClose }) => {
             {/* خلفية الإغلاق (تغلق المودال بالكامل) */}
             <div onClick={onClose} className="fixed inset-0 -z-10 cursor-default"></div>
 
-            {/* --- نافذة الفيديو (تظهر فقط عند الضغط على زر شاهد الشرح) --- */}
+            {/* --- نافذة الفيديو --- */}
             {player && (
-                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 transition-all animate-in fade-in duration-300">
-                    <div className="w-full max-w-5xl relative">
-                        {/* زر إغلاق الفيديو والعودة للتفاصيل */}
-                        <button
-                            onClick={() => setPlayer(false)}
-                            className="absolute top-5 right-5 text-white flex items-center gap-2 hover:text-red-500 transition-colors font-bold"
-                        >
-                            <X className="text-white" size={28} />
-                        </button>
+                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/95 p-4 transition-all animate-in fade-in duration-300">
+                    {/* زر الإغلاق: الآن fixed وفي أقصى اليمين العلوي للشاشة */}
+                    <button
+                        onClick={() => setPlayer(false)}
+                        className="fixed top-6 right-6 z-110 text-white/70 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full"
+                        title="إغلاق الفيديو"
+                    >
+                        <X size={35} strokeWidth={2.5} />
+                    </button>
 
+                    <div className="w-full max-w-5xl relative shadow-2xl">
                         <YoutubePlayer videoId="KoB2cqmYZNg" />
                     </div>
-                    {/* إغلاق الفيديو عند الضغط على المنطقة السوداء المحيطة به */}
+
+                    {/* إغلاق الفيديو عند الضغط على المنطقة السوداء */}
                     <div className="absolute inset-0 -z-10" onClick={() => setPlayer(false)}></div>
                 </div>
             )}
@@ -47,7 +49,9 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p className="text-sm text-gray-500">
                         {source.Author} | {source.Year}
                     </p>
-                    <span className="px-3 py-1 rounded-full text-sm text-white bg-accent">{source.Category}</span>
+                    <span className="px-3 py-1 rounded-full text-sm text-white bg-accent whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] inline-block text-center">
+                        {source.Category}
+                    </span>
                 </div>
 
                 <div className="prose max-w-none text-gray-700 mb-8 border-t pt-4">
