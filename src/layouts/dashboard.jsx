@@ -101,29 +101,69 @@ const DashBoard = () => {
                     >
                         عرض الكل
                     </li>
+                    {/* قسم الكل - لعرض جميع المقالات */}
+                    {/* اللغة العربية */}
                     <li
-                        onClick={() => setCategory("التأثير النفسي والسلوكي")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "التأثير النفسي والسلوكي" ? "bg-accent2 text-white" : ""}`}
+                        onClick={() => setCategory("اللغة العربية")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "اللغة العربية" ? "bg-accent2 text-white" : ""}`}
                     >
-                        التأثير النفسي والسلوكي
+                        اللغة العربية
                     </li>
+
+                    {/* اللغة الإنجليزية */}
                     <li
-                        onClick={() => setCategory("الديناميكيات الاجتماعية والعلاقات الأسرية")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الديناميكيات الاجتماعية والعلاقات الأسرية" ? "bg-accent2 text-white" : ""}`}
+                        onClick={() => setCategory("اللغة الإنجليزية")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "اللغة الإنجليزية" ? "bg-accent2 text-white" : ""}`}
                     >
-                        الديناميكيات الأجتماعية والعلاقات الأسرية
+                        اللغة الإنجليزية
                     </li>
+
+                    {/* التاريخ */}
                     <li
-                        onClick={() => setCategory("الآليات والظواهر الرقمية")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الآليات والظواهر الرقمية" ? "bg-accent2 text-white" : ""}`}
+                        onClick={() => setCategory("التاريخ")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "التاريخ" ? "bg-accent2 text-white" : ""}`}
                     >
-                        الآليات والظواهر الرقمية
+                        التاريخ
                     </li>
+
+                    {/* الجغرافيا */}
                     <li
-                        onClick={() => setCategory("الاستراتيجيات والحلول")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الاستراتيجيات والحلول" ? "bg-accent2 text-white" : ""}`}
+                        onClick={() => setCategory("الجغرافيا")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الجغرافيا" ? "bg-accent2 text-white" : ""}`}
                     >
-                        الاستراتيجيات والحلول
+                        الجغرافيا
+                    </li>
+
+                    {/* علم الاجتماع */}
+                    <li
+                        onClick={() => setCategory("علم الاجتماع")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "علم الاجتماع" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        علم الاجتماع
+                    </li>
+
+                    {/* علم النفس */}
+                    <li
+                        onClick={() => setCategory("علم النفس")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "علم النفس" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        علم النفس
+                    </li>
+
+                    {/* الوثائق والمكتبات */}
+                    <li
+                        onClick={() => setCategory("الوثائق والمكتبات")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الوثائق والمكتبات" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        الوثائق والمكتبات
+                    </li>
+
+                    {/* الآثار */}
+                    <li
+                        onClick={() => setCategory("الآثار")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الآثار" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        الآثار
                     </li>
                 </ul>
 
