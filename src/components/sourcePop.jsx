@@ -1,35 +1,39 @@
+import React, { useState } from "react";
 import { X, TvMinimalPlay } from "lucide-react";
 import YoutubePlayer from "./videoPlayer";
-import { useState } from "react";
 
 const SourceDetailsPopup = ({ source, onClose }) => {
     if (!source) return null;
 
-    const [player, setplayer] = useState(false);
+    const [player, setPlayer] = useState(false);
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            {/* خلفية الإغلاق - عند الضغط خارج المودال الرئيسي */}
-            <div onClick={onClose} className="fixed inset-0 -z-10"></div>
+            {/* خلفية الإغلاق (تغلق المودال بالكامل) */}
+            <div onClick={onClose} className="fixed inset-0 -z-10 cursor-default"></div>
 
-            {/* عرض مشغل الفيديو فوق كل شيء إذا كان الـ player = true */}
+            {/* --- نافذة الفيديو (تظهر فقط عند الضغط على زر شاهد الشرح) --- */}
             {player && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4">
+                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 transition-all animate-in fade-in duration-300">
                     <div className="w-full max-w-5xl relative">
-                        {/* زر إغلاق الفيديو فقط والعودة للتفاصيل */}
+                        {/* زر إغلاق الفيديو والعودة للتفاصيل */}
                         <button
-                            onClick={() => setplayer(false)}
-                            className="absolute -top-12 right-0 text-white flex items-center gap-2 hover:text-red-400 transition-colors"
+                            onClick={() => setPlayer(false)}
+                            className="absolute -top-12 right-0 text-white flex items-center gap-2 hover:text-red-500 transition-colors font-bold"
                         >
-                            إغلاق الفيديو <X size={24} />
+                            <X size={28} />
                         </button>
+
                         <YoutubePlayer videoId="KoB2cqmYZNg" />
                     </div>
+                    {/* إغلاق الفيديو عند الضغط على المنطقة السوداء المحيطة به */}
+                    <div className="absolute inset-0 -z-10" onClick={() => setPlayer(false)}></div>
                 </div>
             )}
 
-            {/* بطاقة تفاصيل المصدر */}
-            <div className="bg-white z-50 rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            {/* --- بطاقة تفاصيل المصدر الأساسية --- */}
+            <div className="bg-white z-50 rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative animate-in zoom-in duration-200">
+                {/* زر إغلاق نافذة التفاصيل */}
                 <button
                     onClick={onClose}
                     className="absolute cursor-pointer top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
@@ -43,7 +47,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p className="text-sm text-gray-500">
                         {source.Author} | {source.Year}
                     </p>
-                    <span className="px-3 py-1 rounded-full text-sm text-white bg-blue-600">{source.Category}</span>
+                    <span className="px-3 py-1 rounded-full text-sm text-white bg-indigo-600">{source.Category}</span>
                 </div>
 
                 <div className="prose max-w-none text-gray-700 mb-8 border-t pt-4">
@@ -51,14 +55,16 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                 </div>
 
                 <div className="flex gap-4 items-center">
+                    {/* زر فتح الفيديو */}
                     <button
-                        onClick={() => setplayer(true)} // تصحيح هنا
-                        className="py-3 px-6 grow cursor-pointer flex gap-2 items-center justify-center bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg shadow-red-200"
+                        onClick={() => setPlayer(true)}
+                        className="py-3 px-6 grow cursor-pointer flex gap-2 items-center justify-center bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg shadow-red-100"
                     >
                         <span>شاهد الشرح</span>
                         <TvMinimalPlay size={22} />
                     </button>
 
+                    {/* رابط المصدر الخارجي */}
                     <a
                         href={source.link}
                         target="_blank"
