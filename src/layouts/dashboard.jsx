@@ -216,14 +216,15 @@ const DashBoard = () => {
                                                 <p className="text-sm text-gray-500">
                                                     {item.Author} | {item.Year}
                                                 </p>
-                                                <span className="px-2 py-1 min-w-22.5 rounded-2xl text-sm text-white bg-accent">{item.Category}</span>
+                                                <span className="px-3 py-1 rounded-full text-sm text-white bg-accent whitespace-nowrap  inline-block text-center">
+                                                    {item.Category}
+                                                </span>
                                             </div>
                                             <p className="text-sm text-gray-600 mt-2 line-clamp-2">{item.Summary}</p>
                                         </div>
                                     </div>
                                 ))}
 
-                                
                                 {pageRef.current < totalPagesRef.current && (
                                     <button
                                         onClick={handleLoadMore}
