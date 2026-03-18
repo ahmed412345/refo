@@ -1,9 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "plyr/dist/plyr.css";
 import { Plyr } from "plyr-react";
 
 const YoutubePlayer = ({ videoId }) => {
-    // حالة للتحكم في ظهور "اللودر"
     const [isLoading, setIsLoading] = useState(true);
 
     const videoSource = {
@@ -17,23 +16,34 @@ const YoutubePlayer = ({ videoId }) => {
         autoplay: true,
     };
 
+    // دالة لإخفاء اللودر
+    const handleVideoReady = () => {
+        console.log("Video is ready!"); // للتأكد في الكونسول
+        setIsLoading(false);
+    };
+
     return (
-        <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10 relative group">
-            {/* 1. اللودر (Spinner) - يظهر فقط عندما يكون isLoading true */}
+        <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10 relative">
+            {/* اللودر بتصميم أنيق */}
             {isLoading && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black transition-opacity duration-500">
-                    {/* شكل اللودر - دائرة بتلف */}
-                    <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-                    <p className="mt-4 text-white/60 text-sm font-medium animate-pulse">جاري تحضير الفيديو...</p>
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0a0a]">
+                    <div className="relative flex items-center justify-center">
+                        {/* الدائرة الخارجية */}
+                        <div className="w-16 h-16 border-4 border-blue-600/10 border-t-blue-600 rounded-full animate-spin"></div>
+                        {/* نقطة في المنتصف تعطي شكل جمالي */}
+                        <div className="absolute w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
+                    </div>
+                    <p className="mt-4 text-gray-400 text-xs tracking-widest uppercase animate-pulse">Loading Experience</p>
                 </div>
             )}
 
-            {/* 2. مشغل الفيديو */}
             <Plyr
                 source={videoSource}
                 options={plyrOptions}
-                // عندما يصبح الفيديو جاهزاً للتشغيل (كود سحري)
-                onReady={() => setIsLoading(false)}
+                // جربنا onReady ولم يفلح؟ نستخدم الأحداث الأكثر دقة:
+                onReady={handleVideoReady}
+                onPlay={handleVideoReady} // إذا بدأ الصوت/الفيديو، اخفِ اللودر فوراً
+                onCanPlay={handleVideoReady} // بمجرد أن تصبح الداتا كافية للتشغيل
             />
         </div>
     );
