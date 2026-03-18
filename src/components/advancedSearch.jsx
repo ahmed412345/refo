@@ -28,15 +28,51 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
-                    <select className="border border-gray-400 p-2 outline-none rounded-lg" value={category} onChange={e => setCategory(e.target.value)}>
+                    <select
+                        className="border border-gray-400 p-2 outline-none rounded-lg"
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                    >
                         <option value="">كل التصنيفات</option>
-                        <option value="التأثير النفسي والسلوكي">التأثير النفسي والسلوكي</option>
-                        <option value="الديناميكيات الاجتماعية والعلاقات الأسرية">الديناميكيات الأجتماعية والعلاقات الأسرية</option>
-                        <option value="الآليات والظواهر الرقمية">الآليات والظواهر الرقمية</option>
-                        <option value="الاستراتيجيات والحلول">الاستراتيجيات والحلول</option>
+                        {/* اللغة العربية */}
+                        <option value="اللغة العربية">اللغة العربية</option>
+
+                        {/* اللغة الإنجليزية */}
+                        <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+
+                        {/* اللغات الشرقية */}
+                        <option value="اللغات الشرقية">اللغات الشرقية</option>
+
+                        {/* التاريخ */}
+                        <option value="التاريخ">التاريخ</option>
+
+                        {/* الجغرافيا */}
+                        <option value="الجغرافيا">الجغرافيا</option>
+
+                        {/* علم الاجتماع */}
+                        <option value="علم الاجتماع">علم الاجتماع</option>
+
+                        {/* علم النفس */}
+                        <option value="علم النفس">علم النفس</option>
+
+                        {/* الوثائق والمكتبات */}
+                        <option value="الوثائق والمكتبات">الوثائق والمكتبات والمعلومات</option>
+
+                        {/* الآثار */}
+                        <option value="الآثار">الآثار</option>
                     </select>
-                    <input placeholder="السنة" className="border border-gray-400 p-2 outline-none rounded-lg" value={year} onChange={e => setYear(e.target.value)} />
-                    <input placeholder="اسم المؤلف" className="border border-gray-400 outline-none p-2 rounded-lg" value={author} onChange={e => setAuthor(e.target.value)} />
+                    <input
+                        placeholder="السنة"
+                        className="border border-gray-400 p-2 outline-none rounded-lg"
+                        value={year}
+                        onChange={e => setYear(e.target.value)}
+                    />
+                    <input
+                        placeholder="اسم المؤلف"
+                        className="border border-gray-400 outline-none p-2 rounded-lg"
+                        value={author}
+                        onChange={e => setAuthor(e.target.value)}
+                    />
 
                     <button
                         onClick={handleApplySearch}

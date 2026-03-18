@@ -118,6 +118,14 @@ const DashBoard = () => {
                         اللغة الإنجليزية
                     </li>
 
+                    {/* اللغات الشرقية */}
+                    <li
+                        onClick={() => setCategory("اللغات الشرقية")}
+                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "اللغات الشرقية" ? "bg-accent2 text-white" : ""}`}
+                    >
+                        اللغات الشرقية
+                    </li>
+
                     {/* التاريخ */}
                     <li
                         onClick={() => setCategory("التاريخ")}
@@ -164,13 +172,6 @@ const DashBoard = () => {
                         className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "الآثار" ? "bg-accent2 text-white" : ""}`}
                     >
                         الآثار
-                    </li>
-                    {/* اللغات الشرقية */}
-                    <li
-                        onClick={() => setCategory("اللغات الشرقية")}
-                        className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${category === "اللغات الشرقية" ? "bg-accent2 text-white" : ""}`}
-                    >
-                        اللغات الشرقية
                     </li>
                 </ul>
 
