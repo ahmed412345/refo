@@ -1,8 +1,7 @@
-import { X } from "lucide-react";
+import { X, TvMinimalPlay } from "lucide-react";
 
 const SourceDetailsPopup = ({ source, onClose }) => {
     if (!source) return null;
-
     return (
         <div className="fixed inset-0 bg-black/50 z-50  flex items-center justify-center p-4">
             <div onClick={onClose} className="fixed inset-0"></div>
@@ -24,15 +23,16 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p>{source.Summary}</p>
                 </div>
 
-                <div>
-                    <button className="py-3 bg-red-500 text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold">
+                <div className="flex gap-4 items-center justify-stretch">
+                    <button className="py-3 grow flex gap-1 items-center bg-red-500 text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold">
                         شاهد الشرح
+                        <TvMinimalPlay size={25} className="text-white"></TvMinimalPlay>
                     </button>
                     <a
                         href={source.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="py-3 bg-accent text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold"
+                        className="py-3 bg-accent grow text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold"
                     >
                         زيارة المصدر
                     </a>
