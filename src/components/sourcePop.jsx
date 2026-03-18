@@ -19,9 +19,9 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                         {/* زر إغلاق الفيديو والعودة للتفاصيل */}
                         <button
                             onClick={() => setPlayer(false)}
-                            className="absolute -top-12 right-0 text-white flex items-center gap-2 hover:text-red-500 transition-colors font-bold"
+                            className="absolute top-5 right-5 text-white flex items-center gap-2 hover:text-red-500 transition-colors font-bold"
                         >
-                            <X size={28} />
+                            <X className="text-white" size={28} />
                         </button>
 
                         <YoutubePlayer videoId="KoB2cqmYZNg" />
@@ -47,7 +47,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p className="text-sm text-gray-500">
                         {source.Author} | {source.Year}
                     </p>
-                    <span className="px-3 py-1 rounded-full text-sm text-white bg-indigo-600">{source.Category}</span>
+                    <span className="px-3 py-1 rounded-full text-sm text-white bg-accent">{source.Category}</span>
                 </div>
 
                 <div className="prose max-w-none text-gray-700 mb-8 border-t pt-4">
