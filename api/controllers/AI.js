@@ -23,7 +23,7 @@ export const chatWithAi = async (req, res) => {
         const relevantSources = await Source.find({ $text: { $search: userQuery } }).limit(2);
         const context =
             relevantSources.length > 0
-                ? relevantSources.map(s => `[المصدر: ${s.title}]: ${s.Summary}`).join("\n")
+                ? relevantSources.map(s => `[عنوان المصدر: ${s.title}] ملخص المصدر: [${s.Summary}]`).join("\n")
                 : "لا توجد مصادر محددة في قاعدة البيانات لهذا الاستفسار.";
 
         // تجهيز التعليمات الصارمة لـ Bloom
@@ -35,6 +35,7 @@ export const chatWithAi = async (req, res) => {
 - إذا سُئلت عن هويتك: "أنا بلوم (Bloom)، مساعد خبير في هذه الببليوغرافيا".
 - إذا كان السؤال خارج سياق البحث العلمي أو المكتبة، اعتذر بلباقة.
 - تجنب الحشو والترحيب الطويل.
+-اذا وجدت مصادر اذكر العنوان الخاص بها فقط في نهايه الرد
 
 سياق المصادر المتاحة (Context):
 ${context}`;
