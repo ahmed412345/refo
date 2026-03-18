@@ -18,13 +18,13 @@ const AddNewSource = () => {
     const categories = [
         "اللغة العربية",
         "اللغة الإنجليزية",
-        "لغات الشرقية",
         "التاريخ",
         "الجغرافيا",
         "علم الاجتماع",
         "علم النفس",
         "الوثائق والمكتبات",
         "الإعلام",
+        "موضوعات اخري",
     ];
     const handleSubmit = async () => {
         if (!formData.title || !formData.Summary || !formData.Category) {

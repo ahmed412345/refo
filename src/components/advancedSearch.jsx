@@ -40,9 +40,6 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
                         {/* اللغة الإنجليزية */}
                         <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
 
-                        {/* اللغات الشرقية */}
-                        <option value="لغات الشرقية">اللغات الشرقية</option>
-
                         {/* التاريخ */}
                         <option value="التاريخ">التاريخ</option>
 
@@ -60,6 +57,9 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
 
                         {/* الآثار */}
                         <option value="الإعلام">الإعلام</option>
+
+                        {/* موضوعات اخري */}
+                        <option value="موضوعات اخري">موضوعات اخري</option>
                     </select>
                     <input
                         placeholder="السنة"
