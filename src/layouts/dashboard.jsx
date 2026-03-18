@@ -212,7 +212,7 @@ const DashBoard = () => {
                                     >
                                         <div className="min-w-0 flex-1">
                                             <h3 className="font-semibold text-lg text-gray-800 truncate">{item.title}</h3>
-                                            <div className="mt-1 flex justify-between">
+                                            <div className="mt-1 flex justify-between items-center">
                                                 <p className="text-sm text-gray-500">
                                                     {item.Author} | {item.Year}
                                                 </p>

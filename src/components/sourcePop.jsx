@@ -12,7 +12,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                 </button>
 
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">{source.title}</h2>
-                <div className="mt-1 flex justify-between">
+                <div className="mt-1 flex items-center justify-between">
                     <p className="text-sm text-gray-500">
                         {source.Author} | {source.Year}
                     </p>
