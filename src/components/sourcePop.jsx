@@ -24,7 +24,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                 </div>
 
                 <div className="flex gap-4 items-center justify-stretch">
-                    <button className="py-3 grow flex gap-1 items-center bg-red-500 text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold">
+                    <button className="py-3 grow flex gap-1 items-center justify-center bg-red-500 text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold">
                         شاهد الشرح
                         <TvMinimalPlay size={25} className="text-white"></TvMinimalPlay>
                     </button>
