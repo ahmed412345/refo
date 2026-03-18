@@ -64,8 +64,9 @@ const AddNewSource = () => {
             </button>
 
             {isOpen && (
-                <div onClick={() => setIsOpen(false)} className="fixed inset-0  bg-black/60 backdrop-blur-sm z-100 flex items-center justify-center p-4">
-                    <div className="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
+                <div className="fixed  bg-black/60 backdrop-blur-sm z-100 flex items-center justify-center p-4">
+                    <div onClick={() => setIsOpen(false)} className="fixed inset-0"></div>
+                    <div className="bg-white p-8 rounded-3xl z-50 w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
                         <button
                             onClick={() => setIsOpen(false)}
                             className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
