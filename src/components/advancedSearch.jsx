@@ -41,7 +41,7 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
                         <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
 
                         {/* اللغات الشرقية */}
-                        <option value="اللغات الشرقية">اللغات الشرقية</option>
+                        <option value="لغات الشرقية">اللغات الشرقية</option>
 
                         {/* التاريخ */}
                         <option value="التاريخ">التاريخ</option>
