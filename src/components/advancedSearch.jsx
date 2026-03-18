@@ -14,7 +14,7 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div onClick={onClose} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white p-6 pt-10 rounded-2xl w-full max-w-sm shadow-xl relative">
                 <button onClick={onClose} className="absolute hover:bg-accent2 p-1 rounded-2xl hover:text-white cursor-pointer top-4 right-4">
                     <X size={20} />
