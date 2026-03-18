@@ -1,5 +1,6 @@
 import { X, TvMinimalPlay } from "lucide-react";
 import YoutubePlayer from "./videoPlayer";
+import { useState } from "react";
 
 const SourceDetailsPopup = ({ source, onClose }) => {
     if (!source) return null;
