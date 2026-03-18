@@ -1,33 +1,40 @@
+import { useState, useRef } from "react";
 import "plyr/dist/plyr.css";
 import { Plyr } from "plyr-react";
 
 const YoutubePlayer = ({ videoId }) => {
-    // إعدادات مصدر الفيديو
+    const [isLoading, setIsLoading] = useState(true);
+    const playerRef = useRef(null);
+
     const videoSource = {
         type: "video",
-        sources: [
-            {
-                src: videoId,
-                provider: "youtube",
-            },
-        ],
-    }; // إعدادات المشغل (Plyr)
+        sources: [{ src: videoId, provider: "youtube" }],
+    };
 
     const plyrOptions = {
-        controls: ["play-large", "play", "progress", "current-time", "mute", "volume", "captions", "settings", "pip", "fullscreen"],
-        youtube: {
-            noCookie: true,
-            rel: 0,
-            showinfo: 0,
-            iv_load_policy: 3,
-            modestbranding: 1,
-        },
-        autoplay: true, // سيبدأ العمل فور ظهور المودال
+        controls: ["play", "progress", "current-time", "mute", "volume", "fullscreen"],
+        autoplay: true,
+        youtube: { noCookie: true, rel: 0, modestbranding: 1 },
     };
 
     return (
-        <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10">
-            <Plyr source={videoSource} options={plyrOptions} />
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10">
+            {/* مؤشر التحميل - بيختفي فوراً أول ما الفيديو يبدأ */}
+            {isLoading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#0a0a0a]">
+                    <div className="w-10 h-10 border-3 border-white/10 border-t-white rounded-full animate-spin"></div>
+                </div>
+            )}
+
+            <Plyr
+                ref={playerRef}
+                source={videoSource}
+                options={plyrOptions}
+                // الحدث ده بيشتغل أول ما الفيديو يبدأ عرض فعلي
+                onPlaying={() => setIsLoading(false)}
+                // أو أول ما يكون الداتا جاهزة تماماً
+                onCanPlay={() => setIsLoading(false)}
+            />
         </div>
     );
 };
