@@ -24,16 +24,19 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     <p>{source.Summary}</p>
                 </div>
 
-                {source.link && (
+                <div>
+                    <button className="py-3 bg-red-500 text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold">
+                        شاهد الشرح
+                    </button>
                     <a
                         href={source.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full py-3 bg-accent text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold"
+                        className="py-3 bg-accent text-white text-center rounded-xl hover:bg-accent2 transition-colors font-bold"
                     >
                         زيارة المصدر
                     </a>
-                )}
+                </div>
             </div>
         </div>
     );
