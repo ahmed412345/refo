@@ -11,6 +11,6 @@ const newSourceSchema = new Schema({
     serial_number: { type: Number, required: true },
     videoId: { type: String, required: true },
 });
-sourceSchema.index({ title: "text", Summary: "text" });
+newSourceSchema.index({ title: "text", Summary: "text" });
 
 export default model("NewSource", newSourceSchema);
