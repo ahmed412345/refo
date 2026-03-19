@@ -25,7 +25,7 @@ const SourceDetailsPopup = ({ source, onClose }) => {
                     </button>
 
                     <div className="w-full max-w-5xl relative shadow-2xl">
-                        <YoutubePlayer videoId="KoB2cqmYZNg" />
+                        <YoutubePlayer videoId={source.videoId} />
                     </div>
 
                     {/* إغلاق الفيديو عند الضغط على المنطقة السوداء */}
