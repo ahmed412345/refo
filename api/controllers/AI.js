@@ -23,7 +23,7 @@ export const chatWithAi = async (req, res) => {
         const relevantSources = await Source.find({ $text: { $search: userQuery } }).limit(2);
         const context =
             relevantSources.length > 0
-                ? relevantSources.map(s => `[عنوان المصدر: ${s.title}] ملخص المصدر: [${s.Summary}]`).join("\n")
+                ? relevantSources.map(s => `[عنوان المصدر: ${s.title}] ملخص المصدر: [${s.Summary}] تصنيف المصدر: [${s.Category}]`).join("\n")
                 : "لا توجد مصادر محددة في قاعدة البيانات لهذا الاستفسار.";
 
         // تجهيز التعليمات الصارمة لـ Bloom
