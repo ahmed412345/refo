@@ -4,7 +4,6 @@ import ChatCache from "../models/Chat.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-// تهيئة Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export const chatWithAi = async (req, res) => {
@@ -12,65 +11,52 @@ export const chatWithAi = async (req, res) => {
         const { messages } = req.body;
         if (!messages || messages.length === 0) return res.status(400).json({ error: "الرجاء إرسال المحادثة" });
 
-        // جلب آخر رسالة من المستخدم
         const userQuery = messages[messages.length - 1].text;
 
-        // --- الخطوة 1: تحسين استعلام البحث (Query Optimization) ---
-        // بنطلب من موديل صغير وسريع يستخرج الكلمات المفتاحية فقط عشان البحث في MongoDB يكون أدق
-        const keywordCompletion = await groq.chat.completions.create({
+        // --- 1. تحسين الاستعلام للبحث (الذكاء في جلب المصادر) ---
+        // بنطلب من لاما بسرعة يدينا كلمات مفتاحية بس عشان المونجو تفهمها صح
+        const searchTermsResponse = await groq.chat.completions.create({
             messages: [
                 {
                     role: "system",
-                    content: "استخرج الكلمات المفتاحية الأساسية فقط للبحث العلمي من الجملة التالية، بدون أي مقدمات أو علامات ترقيم:",
+                    content: "استخرج أهم 3 كلمات مفتاحية للبحث الأكاديمي من الجملة التالية فقط وبدون أي مقدمات.",
                 },
                 {
                     role: "user",
                     content: userQuery,
                 },
             ],
-            model: "llama3-8b-8192", // موديل سريع للمهام الجانبية
+            model: "llama-3.1-8b-instant", // موديل سريع جداً للتحضير
         });
+        const optimizedTerms = searchTermsResponse.choices[0]?.message?.content || userQuery;
 
-        const optimizedQuery = keywordCompletion.choices[0]?.message?.content || userQuery;
-
-        // --- الخطوة 2: جلب المصادر بذكاء (Hybrid Search Logic) ---
-        let relevantSources = await Source.find({ $text: { $search: optimizedQuery } }).limit(3);
-
-        // إذا لم يجد نتائج بالبحث النصي العادي، نستخدم Regex للبحث عن الكلمات بشكل مرن
-        if (relevantSources.length === 0) {
-            const words = optimizedQuery.split(" ").filter(w => w.length > 2);
-            if (words.length > 0) {
-                const regexQueries = words.map(word => ({
-                    $or: [{ title: { $regex: word, $options: "i" } }, { Summary: { $regex: word, $options: "i" } }],
-                }));
-                relevantSources = await Source.find({ $or: regexQueries }).limit(2);
-            }
-        }
+        // --- 2. جلب المصادر (زيادة العدد لـ 3 لضمان شمولية أكبر) ---
+        const relevantSources = await Source.find({ $text: { $search: optimizedTerms } }).limit(3);
 
         const context =
             relevantSources.length > 0
-                ? relevantSources.map(s => `[العنوان: ${s.title}] [الملخص: ${s.Summary}] [التصنيف: ${s.Category}]`).join("\n")
-                : "لا توجد مصادر مباشرة متطابقة في قاعدة البيانات حالياً.";
+                ? relevantSources
+                      .map((s, index) => `${index + 1}. [العنوان الكامل: ${s.title}] - [الملخص: ${s.Summary}] - [التصنيف: ${s.Category}]`)
+                      .join("\n\n")
+                : "لا توجد مصادر مطابقة مباشرة.";
 
-        // --- الخطوة 3: تعليمات Bloom المطورة (Advanced System Prompt) ---
-        const systemInstruction = `أنت Bloom، مساعد ذكي وخبير في استرجاع المعلومات لببليوغرافيا "Refo".
-هدفك هو مساعدة الباحثين بأسلوب أكاديمي رصين ومبتكر.
+        // --- 3. تعليمات Bloom (الذكاء الأكاديمي) ---
+        const systemInstruction = `أنت Bloom، مساعد خبير متخصص في تحليل المعلومات الأكاديمية لببليوغرافيا "Refo".
 
-قواعد التعامل الذكي:
-1. الربط الدلالي: إذا سأل المستخدم عن موضوع (مثل: تأثير الألعاب)، وكان المصدر يتحدث عن (الترفيه الرقمي)، اربط بينهما بذكاء واشرح العلاقة.
-2. التحليل: لا تنقل الملخص حرفياً، بل صُغه بأسلوبك لخدمة سؤال المستخدم.
-3. الأمانة الأكاديمية: إذا لم تجد المصدر، قل بوضوح "هذا المصدر غير متوفر حالياً في مكتبتنا الرقمية، ولكن يمكنك البحث في [اقترح قواعد بيانات عالمية مثل Google Scholar]".
-4. الهوية: أنت "بلوم (Bloom)"، لست مجرد بوت، بل خبير في هذه الببليوغرافيا.
+قواعد السلوك والرد:
+- الأسلوب: استخدم لغة عربية فصحى، رصينة، وأكاديمية. ابتعد عن العامية أو الردود الودية الزائدة.
+- معالجة المعلومات: اقرأ الـ Context المرفق بعناية. إذا سأل المستخدم عن موضوع، ابحث عن الروابط المنطقية بين سؤاله وبين ملخصات المصادر.
+- في حالة عدم وجود مصدر: لا تقُل "لا أعرف"، بل قُل "بناءً على المصادر المتاحة حالياً في الببليوغرافيا، لا يتوفر محتوى مباشر لهذا الاستفسار، ولكن يمكنك التوسع في [اقترح مجال بحثي]."
+- التوثيق: أنت ملزم بذكر اسم المصدر الذي استعنت به في نهاية ردك.
 
-طريقة التنسيق:
-- الإجابة تكون فقرة علمية مركزة.
-- في نهاية الرد، اذكر المراجع المستخدمة فقط بهذا الشكل: 
-📌 المصدر: [اسم العنوان هنا]
+تنسيق الرد النهائي:
+1. ابدأ بالإجابة التحليلية مباشرة.
+2. في نهاية الرد، اترك سطرين ثم اكتب المراجع بهذا الشكل الدقيق:
+[المصدر: اسم العنوان هنا كما ورد في السياق]
 
 سياق المصادر المتاحة (Context):
 ${context}`;
 
-        // تحويل الرسائل لصيغة Groq
         const formattedMessages = [
             { role: "system", content: systemInstruction },
             ...messages.map(msg => ({
@@ -79,23 +65,22 @@ ${context}`;
             })),
         ];
 
-        // --- الخطوة 4: استدعاء الموديل العملاق للإجابة النهائية ---
+        // --- 4. توليد الإجابة النهائية بـ Llama 3.3 لضمان أعلى ذكاء ---
         const chatCompletion = await groq.chat.completions.create({
             messages: formattedMessages,
             model: "llama-3.3-70b-versatile",
-            temperature: 0.4, // حرارة منخفضة لضمان الدقة الأكاديمية وعدم التأليف
-            max_tokens: 1024,
-            top_p: 0.9,
+            temperature: 0.3, // خفضنا الحرارة جداً لضمان عدم التأليف والالتزام بالمصادر
+            max_tokens: 1000,
         });
 
-        const replyText = chatCompletion.choices[0]?.message?.content || "عذراً، واجهت مشكلة في معالجة البيانات.";
+        const replyText = chatCompletion.choices[0]?.message?.content || "عذراً، لم أستطع الإجابة حالياً.";
 
         // تخزين في الكاش (اختياري)
-        await ChatCache.create({ question: userQuery, answer: replyText }).catch(err => console.log("Cache Error ignored"));
+        await ChatCache.create({ question: userQuery, answer: replyText }).catch(() => {});
 
         res.json({ text: replyText });
     } catch (error) {
-        console.error("Groq/DB Error:", error);
-        res.status(500).json({ error: "حدث خطأ فني، يرجى المحاولة لاحقاً" });
+        console.error("Groq Error:", error);
+        res.status(500).json({ error: "حدث خطأ أثناء معالجة الطلب" });
     }
 };
