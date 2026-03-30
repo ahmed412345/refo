@@ -1,6 +1,8 @@
 import { Send, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { chatWithAi } from "../services/chatWithAi.js"; // تأكد من مسار ملف الخدمة
+import { chatWithAi } from "../services/chatWithAi.js";
+
+import ReactMarkdown from "react-markdown";
 
 const AI = () => {
     const [allMsg, setAllMsg] = useState([{ sender: "ai", text: "مرحبا كيف يمكنني مساعدتك" }]);
@@ -48,7 +50,7 @@ const AI = () => {
                             key={index}
                             className={`p-4 rounded-2xl ${ele.sender === "ai" ? "bg-gray-100 mr-auto" : "bg-accent text-white ml-auto"} w-fit max-w-[80%]`}
                         >
-                            {ele.text}
+                            <ReactMarkdown>{ele.text}</ReactMarkdown>
                         </div>
                     ))}
                     {loading && (

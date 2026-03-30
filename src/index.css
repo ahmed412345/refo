@@ -6,3 +6,16 @@
     --color-accent: #0056b3;
     --color-accent2: #4E8D9C;
 }
+
+/* في ملف الـ CSS الخاص بك */
+.ai-message {
+    direction: rtl;
+    text-align: right;
+}
+
+/* عشان النقط تظهر في اليمين مش الشمال */
+.ai-message ul, .ai-message ol {
+    padding-right: 1.5rem;
+    padding-left: 0;
+    list-style-position: inside;
+}
