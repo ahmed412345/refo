@@ -12,33 +12,60 @@ export const chatWithAi = async (req, res) => {
         const { messages } = req.body;
         if (!messages || messages.length === 0) return res.status(400).json({ error: "الرجاء إرسال المحادثة" });
 
-        // جلب آخر رسالة من المستخدم للبحث في قاعدة البيانات
+        // جلب آخر رسالة من المستخدم
         const userQuery = messages[messages.length - 1].text;
 
-        // التحقق من الـ Cache
-        const cachedResponse = await ChatCache.findOne({ question: userQuery });
-        if (cachedResponse) return res.json({ text: cachedResponse.answer });
+        // --- الخطوة 1: تحسين استعلام البحث (Query Optimization) ---
+        // بنطلب من موديل صغير وسريع يستخرج الكلمات المفتاحية فقط عشان البحث في MongoDB يكون أدق
+        const keywordCompletion = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: "استخرج الكلمات المفتاحية الأساسية فقط للبحث العلمي من الجملة التالية، بدون أي مقدمات أو علامات ترقيم:",
+                },
+                {
+                    role: "user",
+                    content: userQuery,
+                },
+            ],
+            model: "llama3-8b-8192", // موديل سريع للمهام الجانبية
+        });
 
-        // جلب المصادر ذات الصلة
-        const relevantSources = await Source.find({ $text: { $search: userQuery } }).limit(2);
+        const optimizedQuery = keywordCompletion.choices[0]?.message?.content || userQuery;
+
+        // --- الخطوة 2: جلب المصادر بذكاء (Hybrid Search Logic) ---
+        let relevantSources = await Source.find({ $text: { $search: optimizedQuery } }).limit(3);
+
+        // إذا لم يجد نتائج بالبحث النصي العادي، نستخدم Regex للبحث عن الكلمات بشكل مرن
+        if (relevantSources.length === 0) {
+            const words = optimizedQuery.split(" ").filter(w => w.length > 2);
+            if (words.length > 0) {
+                const regexQueries = words.map(word => ({
+                    $or: [{ title: { $regex: word, $options: "i" } }, { Summary: { $regex: word, $options: "i" } }],
+                }));
+                relevantSources = await Source.find({ $or: regexQueries }).limit(2);
+            }
+        }
+
         const context =
             relevantSources.length > 0
-                ? relevantSources.map(s => `[عنوان المصدر: ${s.title}] ملخص المصدر: [${s.Summary}] تصنيف المصدر: [${s.Category}]`).join("\n")
-                : "لا توجد مصادر محددة في قاعدة البيانات لهذا الاستفسار.";
+                ? relevantSources.map(s => `[العنوان: ${s.title}] [الملخص: ${s.Summary}] [التصنيف: ${s.Category}]`).join("\n")
+                : "لا توجد مصادر مباشرة متطابقة في قاعدة البيانات حالياً.";
 
-        // تجهيز التعليمات الصارمة لـ Bloom
-        const systemInstruction = `أنت Bloom، مساعد ذكي وخبير في إدارة واسترجاع المعلومات الرقمية لببليوغرافيا الحاليه وهي ببليوجرافيا عامة تجمع مصادر وتوفرها بشكل مرئي.
-مهامك:
-- تحليل المصادر المقدمة في الـ (Context) والإجابة منها بأسلوب علمي مباشر.
-- إذا لم تجد المعلومة في المصادر، أجب باختصار من معلوماتك العامة.
--اذا سألك شخص عن مصدر معين غير متواجد في المصادر اجب بانه غير متواجد حاليا في المصادر المتاحة ولكن سيتم توفيره قريبا يمكنك البحث في اماكن اخري عن [هنا اكتب مصادر خارجيه]
-- لا تستخدم عبارات مثل "بناءً على المصادر" أو "وفقاً للبيانات".
-- إذا سُئلت عن هويتك: "أنا بلوم (Bloom)، مساعد خبير في هذه الببليوغرافيا".
-- إذا كان السؤال خارج سياق البحث العلمي أو المكتبة، اعتذر بلباقة.
-- تجنب الحشو والترحيب الطويل.
--اذا وجدت مصادر اذكر العنوان الخاص بها فقط في نهايه الرد هكذا
-[المصدر:دور المشروعات القومية في تحقيق التنمية المستدامة]
--في حاله عدم وجود مصادر لا تذكرها
+        // --- الخطوة 3: تعليمات Bloom المطورة (Advanced System Prompt) ---
+        const systemInstruction = `أنت Bloom، مساعد ذكي وخبير في استرجاع المعلومات لببليوغرافيا "Refo".
+هدفك هو مساعدة الباحثين بأسلوب أكاديمي رصين ومبتكر.
+
+قواعد التعامل الذكي:
+1. الربط الدلالي: إذا سأل المستخدم عن موضوع (مثل: تأثير الألعاب)، وكان المصدر يتحدث عن (الترفيه الرقمي)، اربط بينهما بذكاء واشرح العلاقة.
+2. التحليل: لا تنقل الملخص حرفياً، بل صُغه بأسلوبك لخدمة سؤال المستخدم.
+3. الأمانة الأكاديمية: إذا لم تجد المصدر، قل بوضوح "هذا المصدر غير متوفر حالياً في مكتبتنا الرقمية، ولكن يمكنك البحث في [اقترح قواعد بيانات عالمية مثل Google Scholar]".
+4. الهوية: أنت "بلوم (Bloom)"، لست مجرد بوت، بل خبير في هذه الببليوغرافيا.
+
+طريقة التنسيق:
+- الإجابة تكون فقرة علمية مركزة.
+- في نهاية الرد، اذكر المراجع المستخدمة فقط بهذا الشكل: 
+📌 المصدر: [اسم العنوان هنا]
 
 سياق المصادر المتاحة (Context):
 ${context}`;
@@ -52,22 +79,23 @@ ${context}`;
             })),
         ];
 
-        // استدعاء الموديل
+        // --- الخطوة 4: استدعاء الموديل العملاق للإجابة النهائية ---
         const chatCompletion = await groq.chat.completions.create({
             messages: formattedMessages,
             model: "llama-3.3-70b-versatile",
-            temperature: 0.6, // خفض الحرارة قليلاً يزيد من دقة الإجابات العلمية
+            temperature: 0.4, // حرارة منخفضة لضمان الدقة الأكاديمية وعدم التأليف
             max_tokens: 1024,
+            top_p: 0.9,
         });
 
-        const replyText = chatCompletion.choices[0]?.message?.content || "عذراً، لم أستطع الإجابة حالياً.";
+        const replyText = chatCompletion.choices[0]?.message?.content || "عذراً، واجهت مشكلة في معالجة البيانات.";
 
-        // تخزين في الكاش (اختياري: يفضل تخزين الأسئلة الفريدة فقط)
-        await ChatCache.create({ question: userQuery, answer: replyText });
+        // تخزين في الكاش (اختياري)
+        await ChatCache.create({ question: userQuery, answer: replyText }).catch(err => console.log("Cache Error ignored"));
 
         res.json({ text: replyText });
     } catch (error) {
-        console.error("Groq Error:", error);
-        res.status(500).json({ error: "حدث خطأ أثناء معالجة الطلب" });
+        console.error("Groq/DB Error:", error);
+        res.status(500).json({ error: "حدث خطأ فني، يرجى المحاولة لاحقاً" });
     }
 };
