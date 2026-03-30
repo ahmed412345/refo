@@ -250,6 +250,7 @@ const DashBoard = () => {
                     onSearch={filters => fetchSources(false, filters)}
                     setSearchValue={setSearchValue}
                     setCategory={setCategory}
+                    category={category}
                 />
             )}
             {selectedSource && <SourceDetailsPopup source={selectedSource} onClose={() => setSelectedSource(null)} />}

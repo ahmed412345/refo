@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 
-const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setCategory }) => {
+const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setCategory,  category}) => {
     const [search, setSearch] = useState("");
     // const [category, setCategory] = useState("");
     const [year, setYear] = useState("");
