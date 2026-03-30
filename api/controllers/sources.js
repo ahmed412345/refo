@@ -4,10 +4,9 @@ import UserSource from "../models/UserSource.js";
 
 export const getSources = async (req, res) => {
     // 1. استخراج معاملات الفلترة والصفحة من الـ Query
-    const { page = 1, author, year, category, search } = req.query;
-
+    const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 20;
-    const skip = (parseInt(page) - 1) * limit;
+    const skip = (page - 1) * limit;
 
     // 2. بناء كائن الفلترة ديناميكياً
     let query = {};
