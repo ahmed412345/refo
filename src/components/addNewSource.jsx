@@ -69,7 +69,7 @@ const AddNewSource = () => {
                     <div className="bg-white p-8 pt-12 rounded-3xl w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute cursor-pointer top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
                         >
                             <X size={24} />
                         </button>
