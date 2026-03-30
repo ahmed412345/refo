@@ -9,6 +9,8 @@ export const getSources = async (req, res) => {
     const limit = 20;
     const skip = (parseInt(page) - 1) * limit;
 
+    console.log(page);
+
     // 2. بناء كائن الفلترة ديناميكياً
     let query = {};
 
