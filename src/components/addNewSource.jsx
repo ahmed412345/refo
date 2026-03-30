@@ -58,7 +58,7 @@ const AddNewSource = () => {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-accent hover:bg-opacity-90 duration-300 text-white p-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
+                className="bg-accent cursor-pointer hover:bg-opacity-90 duration-300 text-white p-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
             >
                 <Plus size={24} />
             </button>
