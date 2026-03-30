@@ -47,7 +47,7 @@ export const getSources = async (req, res) => {
     }
 
     // 3. التنفيذ
-    const result = await Source.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(); // أسرع لو مش محتاج Mongoose documents
+    const result = await Source.find(query).sort({ serial_number: -1 }).skip(skip).limit(limit).lean(); // أسرع لو مش محتاج Mongoose documents
 
     const total = await Source.countDocuments(query);
 
