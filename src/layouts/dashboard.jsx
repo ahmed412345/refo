@@ -249,6 +249,7 @@ const DashBoard = () => {
                     onClose={() => setIsAdvSearchOpen(false)}
                     onSearch={filters => fetchSources(false, filters)}
                     setSearchValue={setSearchValue}
+                    setCategory={setCategory}
                 />
             )}
             {selectedSource && <SourceDetailsPopup source={selectedSource} onClose={() => setSelectedSource(null)} />}
