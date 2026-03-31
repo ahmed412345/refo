@@ -28,8 +28,8 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategor
                         </div>
                         <h2 className="text-xl font-extrabold text-gray-800">بحث متقدم</h2>
                     </div>
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         className="p-2 rounded-full hover:bg-red-50 hover:text-red-500 text-gray-400 transition-all cursor-pointer"
                     >
                         <X size={22} />
@@ -38,7 +38,6 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategor
 
                 {/* Form Section */}
                 <div className="p-6 flex flex-col gap-5">
-                    
                     {/* Main Search Input */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-gray-600 mr-1">كلمة البحث</label>
@@ -53,7 +52,28 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategor
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
+                        {/* Category Select */}
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-semibold text-gray-600 mr-1">التصنيف</label>
+                            <div className="relative">
+                                <select
+                                    className="w-full border border-gray-200 focus:border-accent outline-none p-3 rounded-xl bg-gray-50/30 text-gray-700 appearance-none cursor-pointer"
+                                    value={category}
+                                    onChange={e => setCategory(e.target.value)}
+                                >
+                                    <option value="">كل التصنيفات</option>
+                                    <option value="اللغة العربية">اللغة العربية</option>
+                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                                    <option value="التاريخ">التاريخ</option>
+                                    <option value="الجغرافيا">الجغرافيا</option>
+                                    <option value="علم الاجتماع">علم الاجتماع</option>
+                                    <option value="علم النفس">علم النفس</option>
+                                    <option value="الوثائق والمكتبات">الوثائق والمكتبات</option>
+                                    <option value="الإعلام">الإعلام</option>
+                                    <option value="موضوعات اخري">موضوعات أخرى</option>
+                                </select>
+                            </div>
+                        </div>
 
                         {/* Year Input */}
                         <div className="space-y-1.5">
@@ -78,29 +98,6 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategor
                             onChange={e => setAuthor(e.target.value)}
                         />
                     </div>
-
-                    {/* Category Select */}
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-600 mr-1">التصنيف</label>
-                            <div className="relative">
-                                <select
-                                    className="w-full border border-gray-200 focus:border-accent outline-none p-3 rounded-xl bg-gray-50/30 text-gray-700 appearance-none cursor-pointer"
-                                    value={category}
-                                    onChange={e => setCategory(e.target.value)}
-                                >
-                                    <option value="">كل التصنيفات</option>
-                                    <option value="اللغة العربية">اللغة العربية</option>
-                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
-                                    <option value="التاريخ">التاريخ</option>
-                                    <option value="الجغرافيا">الجغرافيا</option>
-                                    <option value="علم الاجتماع">علم الاجتماع</option>
-                                    <option value="علم النفس">علم النفس</option>
-                                    <option value="الوثائق والمكتبات">الوثائق والمكتبات</option>
-                                    <option value="الإعلام">الإعلام</option>
-                                    <option value="موضوعات اخري">موضوعات أخرى</option>
-                                </select>
-                            </div>
-                        </div>
 
                     {/* Action Button */}
                     <button
