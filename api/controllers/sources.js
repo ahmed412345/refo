@@ -51,7 +51,7 @@ export const getSources = async (req, res) => {
         // تم استخدام .lean() لتحسين الأداء وتجنب مشاكل الـ Memory مع Documents الكبيرة
         const [result, total] = await Promise.all([
             Source.find(finalQuery)
-                .sort({ serial_number: -1 })
+                .sort({Year:-1 , serial_number: -1 })
                 .skip(skip)
                 .limit(limit)
                 .lean(),
