@@ -1,9 +1,8 @@
-import { X } from "lucide-react";
+import { X, Search, Calendar, User, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
-const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setCategory,  category}) => {
+const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setCategory, category }) => {
     const [search, setSearch] = useState("");
-    // const [category, setCategory] = useState("");
     const [year, setYear] = useState("");
     const [author, setAuthor] = useState("");
 
@@ -14,73 +13,98 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setCategory,  
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all">
+            {/* Overlay */}
             <div onClick={onClose} className="fixed inset-0"></div>
 
-            <div className="bg-white p-6 pt-10 z-50 rounded-2xl w-full max-w-sm shadow-xl relative">
-                <button onClick={onClose} className="absolute hover:bg-accent2 p-1 rounded-2xl hover:text-white cursor-pointer top-4 right-4">
-                    <X size={20} />
-                </button>
-                <h2 className="text-xl font-bold mb-4">بحث متقدم</h2>
-
-                <div className="flex flex-col gap-3">
-                    <input
-                        placeholder="كلمة البحث الرئيسية..."
-                        className="border border-gray-400 outline-none p-2 rounded-lg"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
-                    <select
-                        className="border border-gray-400 p-2 outline-none rounded-lg"
-                        value={category}
-                        onChange={e => setCategory(e.target.value)}
+            <div className="bg-white z-50 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden border border-gray-100">
+                {/* Header Section */}
+                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-accent/10 p-2 rounded-lg text-accent">
+                            <Search size={20} />
+                        </div>
+                        <h2 className="text-xl font-extrabold text-gray-800">بحث متقدم</h2>
+                    </div>
+                    <button 
+                        onClick={onClose} 
+                        className="p-2 rounded-full hover:bg-red-50 hover:text-red-500 text-gray-400 transition-all cursor-pointer"
                     >
-                        <option value="">كل التصنيفات</option>
-                        {/* اللغة العربية */}
-                        <option value="اللغة العربية">اللغة العربية</option>
+                        <X size={22} />
+                    </button>
+                </div>
 
-                        {/* اللغة الإنجليزية */}
-                        <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                {/* Form Section */}
+                <div className="p-6 flex flex-col gap-5">
+                    
+                    {/* Main Search Input */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-600 mr-1">كلمة البحث</label>
+                        <div className="relative">
+                            <input
+                                placeholder="عن ماذا تبحث؟"
+                                className="w-full border border-gray-200 focus:border-accent focus:ring-4 focus:ring-accent/5 outline-none p-3 pr-4 rounded-xl transition-all text-gray-700 bg-gray-50/30"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-                        {/* التاريخ */}
-                        <option value="التاريخ">التاريخ</option>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Category Select */}
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-semibold text-gray-600 mr-1">التصنيف</label>
+                            <div className="relative">
+                                <select
+                                    className="w-full border border-gray-200 focus:border-accent outline-none p-3 rounded-xl bg-gray-50/30 text-gray-700 appearance-none cursor-pointer"
+                                    value={category}
+                                    onChange={e => setCategory(e.target.value)}
+                                >
+                                    <option value="">كل التصنيفات</option>
+                                    <option value="اللغة العربية">اللغة العربية</option>
+                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                                    <option value="التاريخ">التاريخ</option>
+                                    <option value="الجغرافيا">الجغرافيا</option>
+                                    <option value="علم الاجتماع">علم الاجتماع</option>
+                                    <option value="علم النفس">علم النفس</option>
+                                    <option value="الوثائق والمكتبات">الوثائق والمكتبات</option>
+                                    <option value="الإعلام">الإعلام</option>
+                                    <option value="موضوعات اخري">موضوعات أخرى</option>
+                                </select>
+                            </div>
+                        </div>
 
-                        {/* الجغرافيا */}
-                        <option value="الجغرافيا">الجغرافيا</option>
+                        {/* Year Input */}
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-semibold text-gray-600 mr-1">سنة النشر</label>
+                            <input
+                                type="number"
+                                placeholder="مثال: 2024"
+                                className="w-full border border-gray-200 focus:border-accent outline-none p-3 rounded-xl bg-gray-50/30 text-gray-700"
+                                value={year}
+                                onChange={e => setYear(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-                        {/* علم الاجتماع */}
-                        <option value="علم الاجتماع">علم الاجتماع</option>
+                    {/* Author Input */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-gray-600 mr-1">اسم المؤلف</label>
+                        <input
+                            placeholder="بحث باسم الكاتب..."
+                            className="w-full border border-gray-200 focus:border-accent outline-none p-3 rounded-xl bg-gray-50/30 text-gray-700"
+                            value={author}
+                            onChange={e => setAuthor(e.target.value)}
+                        />
+                    </div>
 
-                        {/* علم النفس */}
-                        <option value="علم النفس">علم النفس</option>
-
-                        {/* الوثائق والمكتبات */}
-                        <option value="الوثائق والمكتبات">الوثائق والمكتبات والمعلومات</option>
-
-                        {/* الآثار */}
-                        <option value="الإعلام">الإعلام</option>
-
-                        {/* موضوعات اخري */}
-                        <option value="موضوعات اخري">موضوعات اخري</option>
-                    </select>
-                    <input
-                        placeholder="السنة"
-                        className="border border-gray-400 p-2 outline-none rounded-lg"
-                        value={year}
-                        onChange={e => setYear(e.target.value)}
-                    />
-                    <input
-                        placeholder="اسم المؤلف"
-                        className="border border-gray-400 outline-none p-2 rounded-lg"
-                        value={author}
-                        onChange={e => setAuthor(e.target.value)}
-                    />
-
+                    {/* Action Button */}
                     <button
                         onClick={handleApplySearch}
-                        className="bg-accent text-white py-2 rounded-xl mt-2 font-bold hover:bg-accent2 transition-colors"
+                        className="w-full bg-accent text-white py-4 rounded-2xl mt-2 font-bold shadow-lg shadow-accent/20 hover:bg-accent2 hover:shadow-accent2/30 transform hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
-                        بحث
+                        <Search size={18} />
+                        تنفيذ البحث
                     </button>
                 </div>
             </div>
