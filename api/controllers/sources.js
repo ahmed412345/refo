@@ -48,7 +48,7 @@ export const getSources = async (req, res) => {
     // 3. التنفيذ في قاعدة البيانات
     const [result, total] = await Promise.all([
       Source.find(query)
-        .sort({ Year: -1, serial_number: -1 })
+        .sort({ novel_name: 1, volume: -1, issue: -1, serial_number: 1 }) // ترتيب حسب الرواية، ثم المجلد، ثم العدد
         .skip(skip)
         .limit(limit)
         .lean(),

@@ -1,15 +1,21 @@
-import { X, Search, Calendar, User, LayoutGrid } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { useState } from "react";
 
-const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
+const AdvancedSearchPopup = ({ onClose, onSearch, novel }) => {
     const [search, setSearch] = useState("");
     const [year, setYear] = useState("");
     const [author, setAuthor] = useState("");
     const [category, setCategory] = useState("");
 
     const handleApplySearch = () => {
-        onSearch({ search, category, year, author });
-        setSearchValue(search);
+        onSearch({ 
+            search, 
+            novel_name: novel, 
+            category, 
+            year, 
+            author 
+        });
+
         onClose();
     };
 

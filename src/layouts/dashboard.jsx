@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, Waypoints, Plus, Search, Filter } from "lucide-react";
-import AI from "../components/AI";
 import { getSources } from "../services/getSources";
 import SourceDetailsPopup from "../components/sourcePop";
 import AdvancedSearchPopup from "../components/advancedSearch";
 import AddNewSource from "../components/addNewSource";
+import AI from "../components/AI";
+import SideNavD from "../components/sideNave";
 
 const DashBoard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,18 +43,39 @@ const DashBoard = () => {
     }
 
     try {
-      // إذا كان هناك بحث متقدم، نستخدم قيمه، وإلا نستخدم الحالات العادية
-      const search = advFilters ? advFilters.search : debouncedSearch;
-      const novel_name = advFilters ? advFilters.novel_name : novel;
-      const year = advFilters ? advFilters.year : "";
-      const author = advFilters ? advFilters.author : "";
+      let search = "";
+      let novel_name = "";
+      let year = "";
+      let author = "";
+      let category = "";
+      let volume = "";
+      let issue = "";
+
+      // إذا كان هناك بحث متقدم، استخدم فلاتره وأضف الـ novel الحالية
+      if (advFilters) {
+        search = advFilters.search || "";
+        novel_name = advFilters.novel_name || novel; // إضافة الـ novel الحالية إذا لم تُحدد
+        year = advFilters.year || "";
+        author = advFilters.author || "";
+        category = advFilters.category || "";
+
+        volume = advFilters.volume || "";
+        issue = advFilters.edtion || "";
+      } else {
+        // البحث العادي: استخدم debouncedSearch و novel المختارة
+        search = debouncedSearch;
+        novel_name = novel;
+      }
 
       const result = await getSources(
         pageRef.current,
         search,
         novel_name,
         year,
-        author
+        author,
+        category,
+        volume,
+        issue
       );
       totalPagesRef.current = result.totalPages;
 
@@ -181,8 +203,8 @@ const DashBoard = () => {
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:mr-15 p-4 md:p-8 flex flex-col lg:flex-row gap-8 min-w-0">
-        <section className="flex-1 min-w-0 order-1">
+      <main className="flex-1 p-4 mr-0 md:mr-20 items-start md:p-8 flex flex-row gap-3 min-w-0">
+        <section className="flex-1 min-w-0 ">
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center px-6 mb-8">
             <Search size={20} className="text-gray-400 md:mr-4" />
             <input
@@ -267,15 +289,19 @@ const DashBoard = () => {
             )}
           </div>
         </section>
-        <AI />
+        <SideNavD
+          novel={novel}
+          onSearch={(filters) => fetchSources(false, filters)}
+        />
       </main>
 
-      {/* Popups */}
+      {/* AI Floating Chat */}
+      <AI />
       {isAdvSearchOpen && (
         <AdvancedSearchPopup
           onClose={() => setIsAdvSearchOpen(false)}
           onSearch={(filters) => fetchSources(false, filters)}
-          setSearchValue={setSearchValue}
+          novel={novel}
         />
       )}
       {selectedSource && (
