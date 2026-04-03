@@ -186,7 +186,7 @@ const AI = () => {
         <div
           className={`chat-window fixed bottom-28 left-6 z-30 md:45 w-96 max-w-[calc(100vw-3rem)]`}
         >
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col h-[70vh] ">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col h-[50vh] md:h-[70vh]">
             {/* Header */}
             <div className="bg-linear-to-r from-accent to-accent2 text-white p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
