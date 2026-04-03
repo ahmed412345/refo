@@ -1,7 +1,7 @@
 import { X, Search, Calendar, User, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
-const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategory }) => {
+const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue }) => {
     const [search, setSearch] = useState("");
     const [year, setYear] = useState("");
     const [author, setAuthor] = useState("");
@@ -11,7 +11,6 @@ const AdvancedSearchPopup = ({ onClose, onSearch, setSearchValue, setmainCategor
         onSearch({ search, category, year, author });
         setSearchValue(search);
         onClose();
-        setmainCategory(category);
     };
 
     return (

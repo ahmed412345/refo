@@ -1,18 +1,14 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-import express from "express";
-const app = express();
-
 import mongoConnect from "./config/connectDB.js";
-
 import sourcesRouter from "./routes/scource.route.js";
 
 import aiRouter from "./routes/ai.route.js";
-
+import express from "express";
 import cors from "cors";
 
+
+const app = express();
 app.use(cors());
+
 
 app.use(express.json());
 
