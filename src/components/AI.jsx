@@ -158,7 +158,7 @@ const AI = () => {
             `}</style>
 
       {/* Floating Chat Button - Bubble */}
-      <div className="fixed bottom-6 left-6 cursor-pointer z-45 group">
+      <div className="fixed bottom-6 left-6 cursor-pointer z-30 md:45 group">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`floating-button cursor-pointer relative w-16 h-16 rounded-full bg-linear-to-br from-accent to-accent2 shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center text-white active:scale-95 group-hover:scale-110 ${
@@ -184,7 +184,7 @@ const AI = () => {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`chat-window fixed bottom-28 left-6 z-45 w-96 max-w-[calc(100vw-3rem)]`}
+          className={`chat-window fixed bottom-28 left-6 z-30 md:45 w-96 max-w-[calc(100vw-3rem)]`}
         >
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col h-[70vh] ">
             {/* Header */}
