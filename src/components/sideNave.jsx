@@ -48,7 +48,7 @@ const SideNavD = ({ novel, onSearch }) => {
       {/* 1. الخلفية السوداء (Overlay) - تظهر عند الفتح في الموبايل */}
       {isOpenMenu && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-45 md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"
           onClick={() => setIsOpenMenu(false)}
         />
       )}
@@ -115,9 +115,7 @@ const SideNavD = ({ novel, onSearch }) => {
                 {/* قائمة الأعداد */}
                 <div
                   className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                    isOpen
-                      ? "max-h-125 opacity-100 mt-2"
-                      : "max-h-0 opacity-0"
+                    isOpen ? "max-h-125 opacity-100 mt-2" : "max-h-0 opacity-0"
                   }`}
                 >
                   <ul className="mr-5 space-y-1 border-r-2 border-gray-100 pr-3">
