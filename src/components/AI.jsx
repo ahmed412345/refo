@@ -158,7 +158,7 @@ const AI = () => {
             `}</style>
 
       {/* Floating Chat Button - Bubble */}
-      <div className="fixed bottom-6 left-6 cursor-pointer z-50 md:45 group">
+      <div className="fixed bottom-6 left-6 cursor-pointer md:z-50 z-15 group">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`floating-button cursor-pointer relative w-16 h-16 rounded-full bg-linear-to-br from-accent to-accent2 shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center text-white active:scale-95 group-hover:scale-110 ${
