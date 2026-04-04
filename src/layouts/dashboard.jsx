@@ -118,7 +118,7 @@ const DashBoard = () => {
       <nav
         className={`shadow-lg shadow-black/20 bg-white border-r group gap-3 md:fixed bottom-0 top-0 border-gray-200 p-2 flex justify-between ${
           isMenuOpen ? "flex-col fixed left-0 right-0" : "flex-row"
-        } md:flex-col md:min-w-20 md:py-8 shrink-0 z-50`}
+        } md:flex-col md:min-w-20 md:py-8 shrink-0 z-20`}
       >
         <div className="flex w-full justify-center">
           <div className="flex items-center justify-center">
