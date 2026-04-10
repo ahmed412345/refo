@@ -21,6 +21,7 @@ const DashBoard = () => {
 
   const pageRef = useRef(1);
   const totalPagesRef = useRef(1);
+  const lastFiltersRef = useRef(null); // لحفظ آخر فلاتر متقدمة تم استخدامها
 
   // Debounce للبحث
   useEffect(() => {
@@ -37,8 +38,9 @@ const DashBoard = () => {
     if (loading && !isLoadMore) return;
     setLoading(true);
 
-    // حذف المصادر القديمة عند البحث الجديد
+    // حذف المصادر القديمة وإعادة تعيين الصفحة عند البحث الجديد
     if (!isLoadMore) {
+      pageRef.current = 1;
       setSources(null);
     }
 
@@ -61,10 +63,22 @@ const DashBoard = () => {
 
         volume = advFilters.volume || "";
         issue = advFilters.edtion || "";
+
+        // حفظ الفلاتر الحالية لاستخدامها في "عرض المزيد"
+        lastFiltersRef.current = {
+          search,
+          novel_name,
+          year,
+          author,
+          category,
+          volume,
+          issue,
+        };
       } else {
         // البحث العادي: استخدم debouncedSearch و novel المختارة
         search = debouncedSearch;
         novel_name = novel;
+        lastFiltersRef.current = null; // تفريغ الفلاتر عند العودة للبحث العادي
       }
 
       const result = await getSources(
@@ -75,7 +89,7 @@ const DashBoard = () => {
         author,
         category,
         volume,
-        issue
+        issue,
       );
       totalPagesRef.current = result.totalPages;
 
@@ -97,13 +111,19 @@ const DashBoard = () => {
 
   useEffect(() => {
     pageRef.current = 1;
+    lastFiltersRef.current = null; // تفريغ الفلاتر عند تغيير البحث
     fetchSources(false);
   }, [debouncedSearch, novel]);
 
   const handleLoadMore = () => {
     if (pageRef.current < totalPagesRef.current) {
       pageRef.current += 1;
-      fetchSources(true);
+      // إذا كان هناك فلاتر متقدمة محفوظة، استخدمها
+      if (lastFiltersRef.current) {
+        fetchSources(true, lastFiltersRef.current);
+      } else {
+        fetchSources(true);
+      }
     }
   };
 
