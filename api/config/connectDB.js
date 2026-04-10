@@ -1,3 +1,4 @@
+/* Created by Ahmed Eltahan - 2026 */
 import { connect } from "mongoose";
 import { AppError } from "../utils/appError.js";
 const mongoConnect = async () => {
@@ -7,7 +8,7 @@ const mongoConnect = async () => {
     if (!mongoUri)
       throw new AppError(
         "MONGO_URI is not defined in environment variables",
-        500
+        500,
       );
 
     await connect(mongoUri, {
@@ -18,7 +19,7 @@ const mongoConnect = async () => {
     console.error(
       `MongoDB connection error:, ${e.message} status code: ${
         e.statusCode || 500
-      }`
+      }`,
     );
   }
 };

@@ -1,3 +1,4 @@
+/* Created by Ahmed Eltahan - 2026 */
 import { Send, Loader2, Bot, X } from "lucide-react";
 import { useState } from "react";
 import { chatWithAi } from "../services/chatWithAi.js";

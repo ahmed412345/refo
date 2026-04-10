@@ -1,3 +1,4 @@
+/* Created by Ahmed Eltahan - 2026 */
 import React from "react";
 
 class ErrorBoundary extends React.Component {
@@ -16,7 +17,7 @@ class ErrorBoundary extends React.Component {
     ];
 
     const isIgnoredError = ignoredErrors.some((msg) =>
-      error.message.includes(msg)
+      error.message.includes(msg),
     );
 
     if (isIgnoredError) {
@@ -36,7 +37,7 @@ class ErrorBoundary extends React.Component {
     ];
 
     const isIgnoredError = ignoredErrors.some((msg) =>
-      error.message.includes(msg)
+      error.message.includes(msg),
     );
 
     if (!isIgnoredError) {

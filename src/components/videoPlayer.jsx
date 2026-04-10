@@ -1,3 +1,4 @@
+/* Created by Ahmed Eltahan - 2026 */
 import "plyr/dist/plyr.css";
 import { Plyr } from "plyr-react";
 import { useState, useRef, useEffect } from "react";

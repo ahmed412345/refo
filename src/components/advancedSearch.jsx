@@ -1,11 +1,8 @@
+/* Created by Ahmed Eltahan - 2026 */
 import { X, Search } from "lucide-react";
 import { useState } from "react";
 
-const AdvancedSearchPopup = ({
-  onClose,
-  onSearch,
-  novel,
-}) => {
+const AdvancedSearchPopup = ({ onClose, onSearch, novel }) => {
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("");
   const [author, setAuthor] = useState("");
