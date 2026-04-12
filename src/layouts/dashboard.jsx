@@ -17,6 +17,7 @@ const DashBoard = () => {
 
   // حالات البحث والتصنيف
   const [searchValue, setSearchValue] = useState("");
+
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [novel, setNovel] = useState("");
 
@@ -175,7 +176,9 @@ const DashBoard = () => {
           } md:hidden md:group-hover:flex gap-4 flex-col md:min-w-50`}
         >
           <li
-            onClick={() => setNovel("")}
+            onClick={() => {
+              setNovel("");
+            }}
             className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${
               novel === "" ? "bg-accent2 text-white" : ""
             }`}
@@ -185,7 +188,9 @@ const DashBoard = () => {
           {/* قسم الكل - لعرض جميع المقالات */}
           {/* دمياط */}
           <li
-            onClick={() => setNovel("دمياط")}
+            onClick={() => {
+              setNovel("دمياط");
+            }}
             className={`border border-accent md:border-0 rounded-sm w-full p-2 text-center hover:text-white cursor-pointer hover:bg-accent2 duration-300 ${
               novel === "دمياط" ? "bg-accent2 text-white" : ""
             }`}
