@@ -1,6 +1,6 @@
 /* Created by Ahmed Eltahan - 2026 */
 import { Router } from "express";
-import { addTrip } from "../controllers/trip";
+import { addTrip } from "../controllers/trip.js";
 
 const router = Router();
 

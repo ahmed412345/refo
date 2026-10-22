@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const tripSchema = new mongoose.Schema({
-    tripId: String,
     tripTitle: String,
     description: String,
     locations: [
