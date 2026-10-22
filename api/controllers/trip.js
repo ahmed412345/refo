@@ -2,13 +2,20 @@ import { TripModel } from "../models/Trip.js";
 
 export const addTrip = async (req, res) => {
     try {
-        const data = req.body;
+        // سحب القيم مباشرة من req.body
+        const { tripTitle, description, locations } = req.body;
 
-        if (!data || Object.keys(data).length === 0) {
-            return res.status(400).json({ message: "البيانات المطلوبة ناقصة" });
+        // التحقق من وجود البيانات الأساسية (مثلاً العنوان)
+        if (!tripTitle) {
+            return res.status(400).json({ message: "عنوان الرحلة مطلوب" });
         }
 
-        const result = await TripModel.create(data);
+        // إنشاء الرحلة باستخدام القيم المستخرجة صراحةً
+        const result = await TripModel.create({
+            tripTitle,
+            description,
+            locations: locations || [], // للتأكد إنها لو مش موجودة تبقاش undefined
+        });
 
         res.status(201).json({
             message: "تمت إضافة الرحلة بنجاح",

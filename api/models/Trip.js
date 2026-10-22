@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
 const tripSchema = new mongoose.Schema({
-    tripTitle: String,
-    description: String,
+    tripTitle: { type: String, required: true },
+    description: { type: String },
     locations: [
         {
-            id: String,
-            name: String,
-            type: String,
-            position: [Number],
-            description: String,
-            image: String,
+            id: { type: String },
+            name: { type: String },
+            type: { type: String },
+            position: [{ type: Number }], // مصفوفة أرقام (خط الطول والعرض)
+            description: { type: String },
+            image: { type: String },
         },
     ],
 });

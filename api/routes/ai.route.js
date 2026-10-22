@@ -1,9 +1,9 @@
-/* Created by Ahmed Eltahan - 2026 */
-import { Router } from "express";
-import { chatWithAi } from "../controllers/AI.js";
+// /* Created by Ahmed Eltahan - 2026 */
+// import { Router } from "express";
+// import { chatWithAi } from "../controllers/AI.js";
 
-const router = Router();
+// const router = Router();
 
-router.post("/askai", chatWithAi);
+// router.post("/askai", chatWithAi);
 
-export default router;
+// export default router;
