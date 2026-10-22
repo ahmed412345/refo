@@ -6,7 +6,9 @@ import AddNewTripPage from "./components/addNewTrip";
 function App() {
     return (
         <div dir="rtl">
-            <AddNewTripPage />
+            <ErrorBoundary>
+                <AddNewTripPage />
+            </ErrorBoundary>
         </div>
     );
 }

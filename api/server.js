@@ -11,9 +11,6 @@ app.use(cors());
 
 app.use(express.json());
 
-// app.use("/api", sourcesRouter);
-
-// app.use("/api", aiRouter);
 app.use("/api", tripRouter);
 
 const startServer = async () => {
