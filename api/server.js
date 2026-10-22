@@ -1,8 +1,6 @@
 /* Created by Ahmed Eltahan - 2026 */
 import mongoConnect from "./config/connectDB.js";
-import sourcesRouter from "./routes/scource.route.js";
 
-// import aiRouter from "./routes/ai.route.js";
 import tripRouter from "./routes/trip.route.js";
 import express from "express";
 import cors from "cors";
