@@ -11,6 +11,7 @@ const tripSchema = new mongoose.Schema({
             position: [{ type: Number }], // مصفوفة أرقام (خط الطول والعرض)
             description: { type: String },
             image: { type: String },
+            locationURL: { type: String },
         },
     ],
 });
