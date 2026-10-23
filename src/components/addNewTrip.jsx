@@ -8,6 +8,7 @@ import {
     Trash2,
     MapPin,
     Compass,
+    Link as LinkIcon,
 } from "lucide-react";
 import { addTrip } from "../services/addTrip";
 
@@ -23,6 +24,7 @@ const AddNewTripPage = () => {
         lng: "",
         description: "",
         image: "",
+        locationURL: "",
     };
 
     const [formData, setFormData] = useState({
@@ -86,7 +88,7 @@ const AddNewTripPage = () => {
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز البيانات وصياغة position كمصفوفة [lat, lng]
+            // تجهيز البيانات وصياغة position كمصفوفة [lat, lng] وإضافة locationURL
             const payload = {
                 tripTitle: formData.tripTitle,
                 description: formData.description,
@@ -100,6 +102,7 @@ const AddNewTripPage = () => {
                     ],
                     description: loc.description,
                     image: loc.image,
+                    locationURL: loc.locationURL,
                 })),
             };
 
@@ -141,8 +144,7 @@ const AddNewTripPage = () => {
                         </h1>
                     </div>
                     <p className="text-gray-500 text-sm sm:text-base">
-                        قم بملء البيانات الخاصة بالرحلة وأضف نقاط التوقف
-                        والأماكن المختلفة بها.
+                        قم بملء البيانات الخاصة بالرحلة وأضف نقاط التوقف والأماكن المختلفة بها.
                     </p>
                 </div>
 
@@ -199,8 +201,7 @@ const AddNewTripPage = () => {
                             <div className="flex items-center gap-2">
                                 <MapPin className="text-accent" size={22} />
                                 <h2 className="text-lg font-bold text-gray-800">
-                                    نقاط / أماكن الرحلة (
-                                    {formData.locations.length})
+                                    نقاط / أماكن الرحلة ({formData.locations.length})
                                 </h2>
                             </div>
                             <button
@@ -341,23 +342,43 @@ const AddNewTripPage = () => {
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            رابط الصورة (Image URL)
-                                        </label>
-                                        <input
-                                            type="url"
-                                            placeholder="https://example.com/image.jpg"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                            value={loc.image}
-                                            onChange={e =>
-                                                handleLocationChange(
-                                                    index,
-                                                    "image",
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                رابط الصورة (Image URL)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                placeholder="https://example.com/image.jpg"
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={loc.image}
+                                                onChange={e =>
+                                                    handleLocationChange(
+                                                        index,
+                                                        "image",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                رابط الموقع (Location URL / Google Maps)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                placeholder="https://maps.google.com/..."
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={loc.locationURL}
+                                                onChange={e =>
+                                                    handleLocationChange(
+                                                        index,
+                                                        "locationURL",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
