@@ -2,19 +2,21 @@ import { TripModel } from "../models/Trip.js";
 
 export const addTrip = async (req, res) => {
     try {
-        // سحب القيم مباشرة من req.body
-        const { tripTitle, description, locations } = req.body;
+        // سحب القيم الجديدة مباشرة من req.body بناءً على الـ Schema الأخيرة
+        const { eyebrow, title, subtitle, description, stops } = req.body;
 
-        // التحقق من وجود البيانات الأساسية (مثلاً العنوان)
-        if (!tripTitle) {
+        // التحقق من وجود العنوان الأساسي
+        if (!title) {
             return res.status(400).json({ message: "عنوان الرحلة مطلوب" });
         }
 
-        // إنشاء الرحلة باستخدام القيم المستخرجة صراحةً
+        // إنشاء الرحلة باستخدام الحقول الجديدة
         const result = await TripModel.create({
-            tripTitle,
+            eyebrow,
+            title,
+            subtitle,
             description,
-            locations: locations || [], // للتأكد إنها لو مش موجودة تبقاش undefined
+            stops: stops || [], // للتأكد أن المحطات ليست undefined
         });
 
         res.status(201).json({
