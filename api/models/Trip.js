@@ -10,7 +10,6 @@ const tripSchema = new mongoose.Schema({
         {
             id: { type: String, required: true },
             name: { type: String, required: true },
-            bank: { type: String },
             governorate: { type: String },
             coords: [{ type: Number }], // خطوط الطول والعرض [Lat, Lng]
             category: { type: String },
