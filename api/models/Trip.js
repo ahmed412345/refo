@@ -1,19 +1,31 @@
 import mongoose from "mongoose";
 
 const tripSchema = new mongoose.Schema({
-    tripTitle: { type: String, required: true },
+    eyebrow: { type: String },
+    title: { type: String, required: true },
+    subtitle: { type: String },
     description: { type: String },
-    locations: [
+    
+    stops: [
         {
-            id: { type: String },
-            name: { type: String },
-            type: { type: String },
-            position: [{ type: Number }], // مصفوفة أرقام (خط الطول والعرض)
+            id: { type: String, required: true },
+            name: { type: String, required: true },
+            bank: { type: String },
+            governorate: { type: String },
+            coords: [{ type: Number }], // خطوط الطول والعرض [Lat, Lng]
+            category: { type: String },
+            period: { type: String },
+            short: { type: String },
             description: { type: String },
-            image: { type: String },
-            locationURL: { type: String },
-        },
+            tip: { type: String },
+            images: [
+                {
+                    src: { type: String, required: true },
+                    alt: { type: String },
+                }
+            ],
+        }
     ],
-});
+}, { timestamps: true });
 
 export const TripModel = mongoose.model("Trip", tripSchema);
