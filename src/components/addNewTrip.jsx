@@ -8,7 +8,7 @@ import {
     Trash2,
     MapPin,
     Compass,
-    Link as LinkIcon,
+    Image as ImageIcon,
 } from "lucide-react";
 import { addTrip } from "../services/addTrip";
 
@@ -16,70 +16,101 @@ const AddNewTripPage = () => {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState({ type: "", message: "" });
 
-    const initialLocation = {
+    const initialImage = {
+        src: "",
+        alt: "",
+    };
+
+    const initialStop = {
         id: Date.now().toString(),
         name: "",
-        type: "",
+        bank: "",
+        governorate: "",
         lat: "",
         lng: "",
+        category: "",
+        period: "",
+        short: "",
         description: "",
-        image: "",
-        locationURL: "",
+        tip: "",
+        images: [{ ...initialImage }],
     };
 
     const [formData, setFormData] = useState({
-        tripTitle: "",
+        eyebrow: "",
+        title: "",
+        subtitle: "",
         description: "",
-        locations: [{ ...initialLocation }],
+        stops: [{ ...initialStop }],
     });
 
-    // إضافة نقطة/مكان جديد بالقائمة
-    const handleAddLocation = () => {
+    // إضافة محطة جديدة
+    const handleAddStop = () => {
         setFormData(prev => ({
             ...prev,
-            locations: [
-                ...prev.locations,
-                { ...initialLocation, id: Date.now().toString() },
+            stops: [
+                ...prev.stops,
+                { ...initialStop, id: Date.now().toString() },
             ],
         }));
     };
 
-    // حذف مكان معين
-    const handleRemoveLocation = index => {
-        if (formData.locations.length === 1) return; // الحفاظ على نقطة واحدة على الأقل
-        const updatedLocations = formData.locations.filter(
-            (_, i) => i !== index,
-        );
-        setFormData(prev => ({ ...prev, locations: updatedLocations }));
+    // حذف محطة معينة
+    const handleRemoveStop = index => {
+        if (formData.stops.length === 1) return;
+        const updatedStops = formData.stops.filter((_, i) => i !== index);
+        setFormData(prev => ({ ...prev, stops: updatedStops }));
     };
 
-    // تحديث بيانات مكان معّين
-    const handleLocationChange = (index, field, value) => {
-        const updatedLocations = [...formData.locations];
-        updatedLocations[index][field] = value;
-        setFormData(prev => ({ ...prev, locations: updatedLocations }));
+    // تحديث بيانات محطة معينة
+    const handleStopChange = (index, field, value) => {
+        const updatedStops = [...formData.stops];
+        updatedStops[index][field] = value;
+        setFormData(prev => ({ ...prev, stops: updatedStops }));
+    };
+
+    // إضافة صورة جديدة لمشهد/محطة معينة
+    const handleAddImage = stopIndex => {
+        const updatedStops = [...formData.stops];
+        updatedStops[stopIndex].images.push({ ...initialImage });
+        setFormData(prev => ({ ...prev, stops: updatedStops }));
+    };
+
+    // حذف صورة من محطة معينة
+    const handleRemoveImage = (stopIndex, imgIndex) => {
+        const updatedStops = [...formData.stops];
+        if (updatedStops[stopIndex].images.length === 1) return;
+        updatedStops[stopIndex].images = updatedStops[stopIndex].images.filter(
+            (_, i) => i !== imgIndex,
+        );
+        setFormData(prev => ({ ...prev, stops: updatedStops }));
+    };
+
+    // تحديث بيانات صورة معينة داخل المحطة
+    const handleImageChange = (stopIndex, imgIndex, field, value) => {
+        const updatedStops = [...formData.stops];
+        updatedStops[stopIndex].images[imgIndex][field] = value;
+        setFormData(prev => ({ ...prev, stops: updatedStops }));
     };
 
     const handleSubmit = async e => {
         e.preventDefault();
 
-        // التحقق من الحقول الأساسية للرحلة
-        if (!formData.tripTitle || !formData.description) {
+        if (!formData.title || !formData.description) {
             setStatus({
                 type: "error",
-                message: "يرجى ملء الحقول الأساسية (عنوان الرحلة والوصف)",
+                message: "يرجى ملء الحقول الأساسية المطلوبة (عنوان الرحلة والوصف)",
             });
             return;
         }
 
-        // التحقق من أن كل نقطة تحتوي على اسم على الأقل
-        const hasInvalidLocation = formData.locations.some(
-            loc => !loc.name.trim(),
+        const hasInvalidStop = formData.stops.some(
+            stop => !stop.name.trim() || !stop.id.trim(),
         );
-        if (hasInvalidLocation) {
+        if (hasInvalidStop) {
             setStatus({
                 type: "error",
-                message: "يرجى إدخال اسم المكان لجميع النقاط المضافة",
+                message: "يرجى إدخال اسم المحطة لجميع المحطات المضافة",
             });
             return;
         }
@@ -88,21 +119,30 @@ const AddNewTripPage = () => {
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز البيانات وصياغة position كمصفوفة [lat, lng] وإضافة locationURL
+            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً
             const payload = {
-                tripTitle: formData.tripTitle,
+                eyebrow: formData.eyebrow,
+                title: formData.title,
+                subtitle: formData.subtitle,
                 description: formData.description,
-                locations: formData.locations.map(loc => ({
-                    id: loc.id || Date.now().toString(),
-                    name: loc.name,
-                    type: loc.type,
-                    position: [
-                        parseFloat(loc.lat) || 0,
-                        parseFloat(loc.lng) || 0,
+                stops: formData.stops.map(stop => ({
+                    id: stop.id || Date.now().toString(),
+                    name: stop.name,
+                    bank: stop.bank,
+                    governorate: stop.governorate,
+                    coords: [
+                        parseFloat(stop.lat) || 0,
+                        parseFloat(stop.lng) || 0,
                     ],
-                    description: loc.description,
-                    image: loc.image,
-                    locationURL: loc.locationURL,
+                    category: stop.category,
+                    period: stop.period,
+                    short: stop.short,
+                    description: stop.description,
+                    tip: stop.tip,
+                    images: stop.images.map(img => ({
+                        src: img.src,
+                        alt: img.alt,
+                    })),
                 })),
             };
 
@@ -113,16 +153,17 @@ const AddNewTripPage = () => {
                 message: "تمت إضافة الرحلة بنجاح!",
             });
 
-            // إعادة تعيين النموذج بعد النجاح
             setFormData({
-                tripTitle: "",
+                eyebrow: "",
+                title: "",
+                subtitle: "",
                 description: "",
-                locations: [{ ...initialLocation }],
+                stops: [{ ...initialStop }],
             });
         } catch (error) {
             setStatus({
                 type: "error",
-                message: error.message,
+                message: error.message || حدث خطأ أثناء الحفظ,
             });
         } finally {
             setLoading(false);
@@ -135,7 +176,7 @@ const AddNewTripPage = () => {
             dir="rtl"
         >
             <div className="max-w-4xl mx-auto">
-                {/* العنونة الهيدر */}
+                {/* الهيدر */}
                 <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 mb-6">
                     <div className="flex items-center gap-3 text-accent mb-2">
                         <Compass className="w-8 h-8" />
@@ -144,32 +185,67 @@ const AddNewTripPage = () => {
                         </h1>
                     </div>
                     <p className="text-gray-500 text-sm sm:text-base">
-                        قم بملء البيانات الخاصة بالرحلة وأضف نقاط التوقف والأماكن المختلفة بها.
+                        قم بملء تفاصيل الرحلة الأساسية ومحطات الوقوف التابعة لها بدقة.
                     </p>
                 </div>
 
-                {/* النموذج الرئيسي */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* تفاصيل الرحلة الأساسية */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-4">
                         <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
-                            تفاصيل الرحلة
+                            التفاصيل الأساسية للرحلة
                         </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    العنوان التمهيدي (Eyebrow)
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="مثال: رحلة استكشافية"
+                                    className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent transition-all text-sm"
+                                    value={formData.eyebrow}
+                                    onChange={e =>
+                                        setFormData({
+                                            ...formData,
+                                            eyebrow: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    عنوان الرحلة الرئيسية (Title) <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="مثال: أسرار الحضارة القديمة"
+                                    className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent transition-all text-sm"
+                                    value={formData.title}
+                                    onChange={e =>
+                                        setFormData({
+                                            ...formData,
+                                            title: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                عنوان الرحلة{" "}
-                                <span className="text-red-500">*</span>
+                                العنوان الفرعي (Subtitle)
                             </label>
                             <input
                                 type="text"
-                                placeholder="أدخل عنوان الرحلة"
-                                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent transition-all text-sm sm:text-base"
-                                value={formData.tripTitle}
+                                placeholder="مثال: رحلة الأقصر الأثرية — طيبة القديمة"
+                                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent transition-all text-sm"
+                                value={formData.subtitle}
                                 onChange={e =>
                                     setFormData({
                                         ...formData,
-                                        tripTitle: e.target.value,
+                                        subtitle: e.target.value,
                                     })
                                 }
                             />
@@ -177,13 +253,12 @@ const AddNewTripPage = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                وصف الرحلة{" "}
-                                <span className="text-red-500">*</span>
+                                وصف الرحلة (Description) <span className="text-red-500">*</span>
                             </label>
                             <textarea
-                                placeholder="اكتب وصفاً مفصلاً للرحلة..."
-                                rows="4"
-                                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-none transition-all text-sm sm:text-base"
+                                placeholder="اكتب وصفاً شاملاً للرحلة..."
+                                rows="3"
+                                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-none transition-all text-sm"
                                 value={formData.description}
                                 onChange={e =>
                                     setFormData({
@@ -195,93 +270,125 @@ const AddNewTripPage = () => {
                         </div>
                     </div>
 
-                    {/* قسم الأماكن/النقاط */}
+                    {/* قسم المحطات / الأماكن (Stops) */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
                             <div className="flex items-center gap-2">
                                 <MapPin className="text-accent" size={22} />
                                 <h2 className="text-lg font-bold text-gray-800">
-                                    نقاط / أماكن الرحلة ({formData.locations.length})
+                                    محطات الرحلة ({formData.stops.length})
                                 </h2>
                             </div>
                             <button
                                 type="button"
-                                onClick={handleAddLocation}
+                                onClick={handleAddStop}
                                 className="bg-accent text-white hover:bg-opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
                             >
-                                <Plus size={18} /> إضافة مكان جديد
+                                <Plus size={18} /> إضافة محطة جديدة
                             </button>
                         </div>
 
                         <div className="flex flex-col gap-6">
-                            {formData.locations.map((loc, index) => (
+                            {formData.stops.map((stop, stopIndex) => (
                                 <div
-                                    key={loc.id || index}
+                                    key={stop.id || stopIndex}
                                     className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-2xl relative flex flex-col gap-4 transition-all hover:border-gray-300"
                                 >
+                                    {/* رأس المحطة */}
                                     <div className="flex justify-between items-center border-b border-gray-200/60 pb-3">
                                         <span className="text-sm font-bold text-accent bg-accent/10 px-3 py-1 rounded-lg">
-                                            المكان #{index + 1}
+                                            المحطة #{stopIndex + 1} (ID: {stop.id})
                                         </span>
-                                        {formData.locations.length > 1 && (
+                                        {formData.stops.length > 1 && (
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    handleRemoveLocation(index)
-                                                }
+                                                onClick={() => handleRemoveStop(stopIndex)}
                                                 className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center gap-1 text-sm font-medium cursor-pointer"
                                             >
                                                 <Trash2 size={18} />
-                                                <span className="hidden sm:inline">
-                                                    حذف
-                                                </span>
+                                                <span className="hidden sm:inline">حذف المحطة</span>
                                             </button>
                                         )}
                                     </div>
 
+                                    {/* حقول المحطة */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                اسم المكان{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                معرف المحطة الفريد (ID) <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
-                                                placeholder="مثال: الأهرامات"
+                                                placeholder="مثال: karnak"
                                                 className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.name}
+                                                value={stop.id}
                                                 onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "name",
-                                                        e.target.value,
-                                                    )
+                                                    handleStopChange(stopIndex, "id", e.target.value)
                                                 }
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                نوع المكان
+                                                اسم المحطة (Name) <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
-                                                placeholder="مثال: أثري، مطعم، فندق"
+                                                placeholder="مثال: معبد الكرنك"
                                                 className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.type}
+                                                value={stop.name}
                                                 onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "type",
-                                                        e.target.value,
-                                                    )
+                                                    handleStopChange(stopIndex, "name", e.target.value)
                                                 }
                                             />
                                         </div>
                                     </div>
 
-                                    {/* الإحداثيات Position: Latitude & Longitude */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                الجانب / النطاق (Bank)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="مثال: البر الشرقي"
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={stop.bank}
+                                                onChange={e =>
+                                                    handleStopChange(stopIndex, "bank", e.target.value)
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                المحافظة (Governorate)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="مثال: محافظة الأقصر"
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={stop.governorate}
+                                                onChange={e =>
+                                                    handleStopChange(stopIndex, "governorate", e.target.value)
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                التصنيف (Category)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="مثال: temple"
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={stop.category}
+                                                onChange={e =>
+                                                    handleStopChange(stopIndex, "category", e.target.value)
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* الإحداثيات coords: [Lat, Lng] */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
@@ -290,15 +397,11 @@ const AddNewTripPage = () => {
                                             <input
                                                 type="number"
                                                 step="any"
-                                                placeholder="29.9792"
+                                                placeholder="25.7188"
                                                 className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.lat}
+                                                value={stop.lat}
                                                 onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "lat",
-                                                        e.target.value,
-                                                    )
+                                                    handleStopChange(stopIndex, "lat", e.target.value)
                                                 }
                                             />
                                         </div>
@@ -309,15 +412,11 @@ const AddNewTripPage = () => {
                                             <input
                                                 type="number"
                                                 step="any"
-                                                placeholder="31.1342"
+                                                placeholder="32.6573"
                                                 className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.lng}
+                                                value={stop.lng}
                                                 onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "lng",
-                                                        e.target.value,
-                                                    )
+                                                    handleStopChange(stopIndex, "lng", e.target.value)
                                                 }
                                             />
                                         </div>
@@ -325,59 +424,112 @@ const AddNewTripPage = () => {
 
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            وصف المكان
+                                            العصر / الفترة التاريخية (Period)
                                         </label>
-                                        <textarea
-                                            placeholder="تفاصيل إضافية عن المكان..."
-                                            rows="2"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent resize-none"
-                                            value={loc.description}
+                                        <input
+                                            type="text"
+                                            placeholder="مثال: من الدولة الوسطى حتى العصر البطلمي"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                            value={stop.period}
                                             onChange={e =>
-                                                handleLocationChange(
-                                                    index,
-                                                    "description",
-                                                    e.target.value,
-                                                )
+                                                handleStopChange(stopIndex, "period", e.target.value)
                                             }
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                رابط الصورة (Image URL)
-                                            </label>
-                                            <input
-                                                type="url"
-                                                placeholder="https://example.com/image.jpg"
-                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.image}
-                                                onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "image",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            نبذة مختصرة (Short Description)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="وصف مختصر جداً للمحطة..."
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                            value={stop.short}
+                                            onChange={e =>
+                                                handleStopChange(stopIndex, "short", e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            الوصف التفصيلي (Description)
+                                        </label>
+                                        <textarea
+                                            placeholder="التفاصيل الكاملة للمحطة..."
+                                            rows="2"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent resize-none"
+                                            value={stop.description}
+                                            onChange={e =>
+                                                handleStopChange(stopIndex, "description", e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            نصيحة الزيارة (Tip)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="مثال: يُنصح بالزيارة في الصباح الباكر..."
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                            value={stop.tip}
+                                            onChange={e =>
+                                                handleStopChange(stopIndex, "tip", e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* قسم صور المحطة الديناميكي (Images) */}
+                                    <div className="bg-white/80 p-4 rounded-xl border border-gray-200 flex flex-col gap-3 mt-2">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                                                <ImageIcon size={16} className="text-accent" />
+                                                <span>صور المحطة ({stop.images.length})</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddImage(stopIndex)}
+                                                className="text-xs bg-accent/10 text-accent hover:bg-accent/20 px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <Plus size={14} /> إضافة صورة
+                                            </button>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                رابط الموقع (Location URL / Google Maps)
-                                            </label>
-                                            <input
-                                                type="url"
-                                                placeholder="https://maps.google.com/..."
-                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={loc.locationURL}
-                                                onChange={e =>
-                                                    handleLocationChange(
-                                                        index,
-                                                        "locationURL",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
+
+                                        <div className="flex flex-col gap-3">
+                                            {stop.images.map((img, imgIndex) => (
+                                                <div key={imgIndex} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                                    <input
+                                                        type="url"
+                                                        placeholder="رابط الصورة (src)"
+                                                        className="flex-1 border border-gray-200 bg-white p-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                        value={img.src}
+                                                        onChange={e =>
+                                                            handleImageChange(stopIndex, imgIndex, "src", e.target.value)
+                                                        }
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="وصف الصورة (alt)"
+                                                        className="flex-1 border border-gray-200 bg-white p-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                        value={img.alt}
+                                                        onChange={e =>
+                                                            handleImageChange(stopIndex, imgIndex, "alt", e.target.value)
+                                                        }
+                                                    />
+                                                    {stop.images.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveImage(stopIndex, imgIndex)}
+                                                            className="text-red-500 hover:text-red-700 p-1.5 rounded-md cursor-pointer"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -385,7 +537,7 @@ const AddNewTripPage = () => {
                         </div>
                     </div>
 
-                    {/* التنبيهات والأخطاء */}
+                    {/* التنبيهات */}
                     {status.message && (
                         <div
                             className={`flex items-center gap-3 p-4 rounded-2xl ${
@@ -405,7 +557,7 @@ const AddNewTripPage = () => {
                         </div>
                     )}
 
-                    {/* زر الإرسال والحفظ */}
+                    {/* زر الحفظ */}
                     <div className="flex justify-end pt-2">
                         <button
                             type="submit"
