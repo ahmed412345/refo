@@ -163,7 +163,7 @@ const AddNewTripPage = () => {
         } catch (error) {
             setStatus({
                 type: "error",
-                message: error.message || حدث خطأ أثناء الحفظ,
+                message: error.message || "حدث خطأ أثناء الحفظ",
             });
         } finally {
             setLoading(false);
