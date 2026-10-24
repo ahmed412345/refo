@@ -24,7 +24,6 @@ const AddNewTripPage = () => {
     const initialStop = {
         id: Date.now().toString(),
         name: "",
-        bank: "",
         governorate: "",
         lat: "",
         lng: "",
@@ -69,7 +68,7 @@ const AddNewTripPage = () => {
         setFormData(prev => ({ ...prev, stops: updatedStops }));
     };
 
-    // إضافة صورة جديدة لمشهد/محطة معينة
+    // إضافة صورة جديدة لمحطة معينة
     const handleAddImage = stopIndex => {
         const updatedStops = [...formData.stops];
         updatedStops[stopIndex].images.push({ ...initialImage });
@@ -105,7 +104,7 @@ const AddNewTripPage = () => {
         }
 
         const hasInvalidStop = formData.stops.some(
-            stop => !stop.name.trim() || !stop.id.trim(),
+            stop => !stop.name.trim(),
         );
         if (hasInvalidStop) {
             setStatus({
@@ -119,7 +118,7 @@ const AddNewTripPage = () => {
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً
+            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً بدون حقل bank ومع الحفاظ على الـ id المتولد بالثواني
             const payload = {
                 eyebrow: formData.eyebrow,
                 title: formData.title,
@@ -128,7 +127,6 @@ const AddNewTripPage = () => {
                 stops: formData.stops.map(stop => ({
                     id: stop.id || Date.now().toString(),
                     name: stop.name,
-                    bank: stop.bank,
                     governorate: stop.governorate,
                     coords: [
                         parseFloat(stop.lat) || 0,
@@ -158,7 +156,7 @@ const AddNewTripPage = () => {
                 title: "",
                 subtitle: "",
                 description: "",
-                stops: [{ ...initialStop }],
+                stops: [{ ...initialStop, id: Date.now().toString() }],
             });
         } catch (error) {
             setStatus({
@@ -294,10 +292,10 @@ const AddNewTripPage = () => {
                                     key={stop.id || stopIndex}
                                     className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-2xl relative flex flex-col gap-4 transition-all hover:border-gray-300"
                                 >
-                                    {/* رأس المحطة */}
+                                    {/* رأس المحطة (الرقم التسلسلي فقط بدون إظهار الـ ID) */}
                                     <div className="flex justify-between items-center border-b border-gray-200/60 pb-3">
                                         <span className="text-sm font-bold text-accent bg-accent/10 px-3 py-1 rounded-lg">
-                                            المحطة #{stopIndex + 1} (ID: {stop.id})
+                                            المحطة #{stopIndex + 1}
                                         </span>
                                         {formData.stops.length > 1 && (
                                             <button
@@ -315,20 +313,6 @@ const AddNewTripPage = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                معرف المحطة الفريد (ID) <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="مثال: karnak"
-                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={stop.id}
-                                                onChange={e =>
-                                                    handleStopChange(stopIndex, "id", e.target.value)
-                                                }
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                 اسم المحطة (Name) <span className="text-red-500">*</span>
                                             </label>
                                             <input
@@ -338,23 +322,6 @@ const AddNewTripPage = () => {
                                                 value={stop.name}
                                                 onChange={e =>
                                                     handleStopChange(stopIndex, "name", e.target.value)
-                                                }
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                الجانب / النطاق (Bank)
-                                            </label>
-                                            <input
-                                                type="text"
-                                                placeholder="مثال: البر الشرقي"
-                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                                value={stop.bank}
-                                                onChange={e =>
-                                                    handleStopChange(stopIndex, "bank", e.target.value)
                                                 }
                                             />
                                         </div>
@@ -372,6 +339,9 @@ const AddNewTripPage = () => {
                                                 }
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                 التصنيف (Category)
@@ -383,6 +353,20 @@ const AddNewTripPage = () => {
                                                 value={stop.category}
                                                 onChange={e =>
                                                     handleStopChange(stopIndex, "category", e.target.value)
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                العصر / الفترة التاريخية (Period)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="مثال: من الدولة الوسطى حتى العصر البطلمي"
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={stop.period}
+                                                onChange={e =>
+                                                    handleStopChange(stopIndex, "period", e.target.value)
                                                 }
                                             />
                                         </div>
@@ -420,21 +404,6 @@ const AddNewTripPage = () => {
                                                 }
                                             />
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            العصر / الفترة التاريخية (Period)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="مثال: من الدولة الوسطى حتى العصر البطلمي"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                            value={stop.period}
-                                            onChange={e =>
-                                                handleStopChange(stopIndex, "period", e.target.value)
-                                            }
-                                        />
                                     </div>
 
                                     <div>
