@@ -17,6 +17,7 @@ const tripSchema = new mongoose.Schema({
             short: { type: String },
             description: { type: String },
             tip: { type: String },
+            mapURL: { type: String },
             images: [
                 {
                     src: { type: String, required: true },
