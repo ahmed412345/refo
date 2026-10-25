@@ -9,6 +9,7 @@ import {
     MapPin,
     Compass,
     Image as ImageIcon,
+    Link as LinkIcon,
 } from "lucide-react";
 import { addTrip } from "../services/addTrip";
 
@@ -27,6 +28,7 @@ const AddNewTripPage = () => {
         governorate: "",
         lat: "",
         lng: "",
+        mapURL: "",
         category: "",
         period: "",
         short: "",
@@ -118,7 +120,7 @@ const AddNewTripPage = () => {
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً بدون حقل bank ومع الحفاظ على الـ id المتولد بالثواني
+            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً مع إضافة mapURL لكل محطة
             const payload = {
                 eyebrow: formData.eyebrow,
                 title: formData.title,
@@ -132,6 +134,7 @@ const AddNewTripPage = () => {
                         parseFloat(stop.lat) || 0,
                         parseFloat(stop.lng) || 0,
                     ],
+                    mapURL: stop.mapURL,
                     category: stop.category,
                     period: stop.period,
                     short: stop.short,
@@ -292,7 +295,7 @@ const AddNewTripPage = () => {
                                     key={stop.id || stopIndex}
                                     className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-2xl relative flex flex-col gap-4 transition-all hover:border-gray-300"
                                 >
-                                    {/* رأس المحطة (الرقم التسلسلي فقط بدون إظهار الـ ID) */}
+                                    {/* رأس المحطة */}
                                     <div className="flex justify-between items-center border-b border-gray-200/60 pb-3">
                                         <span className="text-sm font-bold text-accent bg-accent/10 px-3 py-1 rounded-lg">
                                             المحطة #{stopIndex + 1}
@@ -372,8 +375,8 @@ const AddNewTripPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* الإحداثيات coords: [Lat, Lng] */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* الإحداثيات coords: [Lat, Lng] ورابط الخريطة mapURL */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                 خط العرض (Latitude)
@@ -401,6 +404,21 @@ const AddNewTripPage = () => {
                                                 value={stop.lng}
                                                 onChange={e =>
                                                     handleStopChange(stopIndex, "lng", e.target.value)
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                                                <LinkIcon size={14} className="text-accent" />
+                                                رابط الخريطة (Map URL)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                placeholder="https://maps.google.com/..."
+                                                className="w-full border border-gray-200 bg-white p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                                value={stop.mapURL}
+                                                onChange={e =>
+                                                    handleStopChange(stopIndex, "mapURL", e.target.value)
                                                 }
                                             />
                                         </div>
