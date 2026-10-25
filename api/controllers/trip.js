@@ -2,20 +2,18 @@ import { TripModel } from "../models/Trip.js";
 
 export const addTrip = async (req, res) => {
     try {
-        // سحب القيم الجديدة مباشرة من req.body بناءً على الـ Schema الأخيرة
-        const { eyebrow, title, subtitle, description, stops } = req.body;
+        // سحب كائنات ar و en والمحطات stops من req.body
+        const { ar, en, stops } = req.body;
 
-        // التحقق من وجود العنوان الأساسي
-        if (!title) {
-            return res.status(400).json({ message: "عنوان الرحلة مطلوب" });
+        // التحقق من وجود العنوان الأساسي (مثلاً في العربي أو الإنجليزي)
+        if (!ar?.title && !en?.title) {
+            return res.status(400).json({ message: "عنوان الرحلة مطلوب بأي لغة على الأقل" });
         }
 
-        // إنشاء الرحلة باستخدام الحقول الجديدة
+        // إنشاء الرحلة باستخدام الهيكل الجديد
         const result = await TripModel.create({
-            eyebrow,
-            title,
-            subtitle,
-            description,
+            ar: ar || {},
+            en: en || {},
             stops: stops || [], // للتأكد أن المحطات ليست undefined
         });
 
