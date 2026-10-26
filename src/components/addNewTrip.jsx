@@ -32,19 +32,19 @@ const AddNewTripPage = () => {
             name: "",
             governorate: "",
             category: "",
-            period: "",
+            period: "", // مستثنى من الإلزام
             short: "",
             description: "",
-            tip: "",
+            tip: "", // مستثنى من الإلزام
         },
         en: {
             name: "",
             governorate: "",
             category: "",
-            period: "",
+            period: "", // مستثنى من الإلزام
             short: "",
             description: "",
-            tip: "",
+            tip: "", // مستثنى من الإلزام
         },
         images: [{ ...initialImage }],
     };
@@ -108,9 +108,9 @@ const AddNewTripPage = () => {
     // إضافة صورة جديدة لمحطة معينة
     const handleAddImage = stopIndex => {
         const updatedStops = [...formData.stops];
-        updatedStops[stopIndex].images.push({ 
-            src: "", 
-            alt: { ar: "", en: "" } 
+        updatedStops[stopIndex].images.push({
+            src: "",
+            alt: { ar: "", en: "" },
         });
         setFormData(prev => ({ ...prev, stops: updatedStops }));
     };
@@ -131,7 +131,6 @@ const AddNewTripPage = () => {
         if (field === "src") {
             updatedStops[stopIndex].images[imgIndex].src = value;
         } else {
-            // field هو ar أو en للـ alt
             updatedStops[stopIndex].images[imgIndex].alt[field] = value;
         }
         setFormData(prev => ({ ...prev, stops: updatedStops }));
@@ -140,30 +139,86 @@ const AddNewTripPage = () => {
     const handleSubmit = async e => {
         e.preventDefault();
 
-        if (!formData.ar.title && !formData.en.title) {
+        // 1. التحقق من الحقول الرئيسية (إجبارية بالكامل للغتين)
+        const isMainArComplete =
+            formData.ar.eyebrow.trim() &&
+            formData.ar.title.trim() &&
+            formData.ar.subtitle.trim() &&
+            formData.ar.description.trim();
+
+        const isMainEnComplete =
+            formData.en.eyebrow.trim() &&
+            formData.en.title.trim() &&
+            formData.en.subtitle.trim() &&
+            formData.en.description.trim();
+
+        if (!isMainArComplete || !isMainEnComplete) {
             setStatus({
                 type: "error",
-                message: "يرجى إدخال عنوان الرحلة الرئيسي بأي لغة على الأقل",
+                message:
+                    "يرجى ملء جميع الحقول الرئيسية للرحلة باللغتين العربية والإنجليزية.",
             });
             return;
         }
 
-        const hasInvalidStop = formData.stops.some(
-            stop => !stop.ar.name.trim() && !stop.en.name.trim(),
-        );
-        if (hasInvalidStop) {
-            setStatus({
-                type: "error",
-                message: "يرجى إدخال اسم المحطة (عربي أو إنجليزي) لجميع المحطات المضافة",
-            });
-            return;
+        // 2. التحقق من المحطات (جميع الحقول إجبارية عدا tip و period)
+        for (let i = 0; i < formData.stops.length; i++) {
+            const stop = formData.stops[i];
+
+            // التحقق من الحقول المشتركة للمحطة (الإحداثيات ورابط الخريطة)
+            if (!stop.lat.trim() || !stop.lng.trim() || !stop.mapURL.trim()) {
+                setStatus({
+                    type: "error",
+                    message: `يرجى ملء إحداثيات ورابط الخريطة للمحطة رقم ${i + 1}.`,
+                });
+                return;
+            }
+
+            // التحقق من بيانات المحطة بالعربية (ما عدا period و tip)
+            const isStopArComplete =
+                stop.ar.name.trim() &&
+                stop.ar.governorate.trim() &&
+                stop.ar.category.trim() &&
+                stop.ar.short.trim() &&
+                stop.ar.description.trim();
+
+            // التحقق من بيانات المحطة بالإنجليزية (ما عدا period و tip)
+            const isStopEnComplete =
+                stop.en.name.trim() &&
+                stop.en.governorate.trim() &&
+                stop.en.category.trim() &&
+                stop.en.short.trim() &&
+                stop.en.description.trim();
+
+            if (!isStopArComplete || !isStopEnComplete) {
+                setStatus({
+                    type: "error",
+                    message: `يرجى ملء جميع بيانات المحطة رقم ${i + 1} (العربية والإنجليزية) ما عدا الفترة التاريخية ونصيحة الزيارة فهما اختياريتان.`,
+                });
+                return;
+            }
+
+            // التحقق من الصور الخاصة بالمحطة
+            for (let j = 0; j < stop.images.length; j++) {
+                const img = stop.images[j];
+                if (
+                    !img.src.trim() ||
+                    !img.alt.ar.trim() ||
+                    !img.alt.en.trim()
+                ) {
+                    setStatus({
+                        type: "error",
+                        message: `يرجى إدخال رابط ووصف الصورة (عربي وإنجليزي) في المحطة رقم ${i + 1}.`,
+                    });
+                    return;
+                }
+            }
         }
 
         setLoading(true);
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز الـ Payload بالشكل المطابق للـ Schema تماماً
             const payload = {
                 ar: formData.ar,
                 en: formData.en,
