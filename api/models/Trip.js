@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const tripSchema = new mongoose.Schema({
+    keywords: {
+        type: [String],
+        default: [],
+
+    },
     // كائن اللغة العربية للرحلة الرئيسية
     ar: {
         eyebrow: { type: String },
