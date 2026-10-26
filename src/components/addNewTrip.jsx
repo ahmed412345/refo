@@ -484,13 +484,25 @@ const AddNewTripPage = () => {
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-600 mb-1">التصنيف (Category AR)</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="مثال: معبد أثري"
-                                                        className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent"
-                                                        value={stop.ar.category}
-                                                        onChange={e => handleStopFieldChange(stopIndex, "ar", "category", e.target.value)}
-                                                    />
+                                                    <select
+  className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800"
+  value={stop.ar.category}
+  onChange={e => handleStopFieldChange(stopIndex, "ar", "category", e.target.value)}
+>
+  <option value="" disabled>اختر نوع المكان...</option>
+  <option value="museum">متحف</option>
+  <option value="landmark">معلم سياحي / أثري</option>
+  <option value="restaurant">مطعم</option>
+  <option value="cafe">مقهى / كافيه</option>
+  <option value="park">حديقة عامة</option>
+  <option value="beach">شاطئ / كورنيش</option>
+  <option value="sweets">متجر حلوى</option>
+  <option value="rest_stop">استراحة</option>
+  <option value="supermarket">سوبر ماركت</option>
+  <option value="mall">مركز تسوق / مول</option>
+  <option value="hotel">فندق / مكان إقامة</option>
+  <option value="other">أخرى</option>
+</select>
                                                 </div>
                                             </div>
 
@@ -569,13 +581,25 @@ const AddNewTripPage = () => {
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">Category (EN)</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="e.g. Temple"
-                                                        className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent text-left"
-                                                        value={stop.en.category}
-                                                        onChange={e => handleStopFieldChange(stopIndex, "en", "category", e.target.value)}
-                                                    />
+                                                    <select
+  className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800 text-left"
+  value={stop.en.category}
+  onChange={e => handleStopFieldChange(stopIndex, "en", "category", e.target.value)}
+>
+  <option value="" disabled>Select category...</option>
+  <option value="museum">Museum</option>
+  <option value="landmark">Landmark / Tourist Spot</option>
+  <option value="restaurant">Restaurant</option>
+  <option value="cafe">Café</option>
+  <option value="park">Park</option>
+  <option value="beach">Beach / Corniche</option>
+  <option value="sweets">Sweets Shop</option>
+  <option value="rest_stop">Rest Stop</option>
+  <option value="supermarket">Supermarket</option>
+  <option value="mall">Shopping Mall</option>
+  <option value="hotel">Hotel</option>
+  <option value="other">Other</option>
+</select>
                                                 </div>
                                             </div>
 
