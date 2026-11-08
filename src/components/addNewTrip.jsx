@@ -1,5 +1,5 @@
 /* Created by Ahmed Eltahan - 2026 */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Loader2,
     CheckCircle2,
@@ -11,59 +11,97 @@ import {
     Image as ImageIcon,
     Link as LinkIcon,
     Globe,
+    RotateCcw,
 } from "lucide-react";
 import { addTrip } from "../services/addTrip";
+
+// مفتاح التخزين في المتصفح
+const STORAGE_KEY = "add_trip_draft_data";
+
+// دالة مساعدة لإنشاء صورة جديدة بنسخة مستقلة في الذاكرة
+const createInitialImage = () => ({
+    src: "",
+    alt: { ar: "", en: "" },
+});
+
+// دالة مساعدة لإنشاء محطة جديدة بنسخة مستقلة تماماً (Deep Copy)
+const createInitialStop = () => ({
+    id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+    lat: "",
+    lng: "",
+    mapURL: "",
+    ar: {
+        name: "",
+        governorate: "",
+        category: "",
+        period: "", // مستثنى من الإلزام
+        short: "",
+        description: "",
+        tip: "", // مستثنى من الإلزام
+    },
+    en: {
+        name: "",
+        governorate: "",
+        category: "",
+        period: "", // مستثنى من الإلزام
+        short: "",
+        description: "",
+        tip: "", // مستثنى من الإلزام
+    },
+    images: [createInitialImage()],
+});
+
+// دالة لإنشاء الحالة الابتدائية الفارغة للنموذج بالكامل
+const getInitialFormData = () => ({
+    ar: {
+        eyebrow: "",
+        title: "",
+        subtitle: "",
+        description: "",
+    },
+    en: {
+        eyebrow: "",
+        title: "",
+        subtitle: "",
+        description: "",
+    },
+    stops: [createInitialStop()],
+});
 
 const AddNewTripPage = () => {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState({ type: "", message: "" });
 
-    const initialImage = {
-        src: "",
-        alt: { ar: "", en: "" },
-    };
-
-    const initialStop = {
-        id: Date.now().toString(),
-        lat: "",
-        lng: "",
-        mapURL: "",
-        ar: {
-            name: "",
-            governorate: "",
-            category: "",
-            period: "", // مستثنى من الإلزام
-            short: "",
-            description: "",
-            tip: "", // مستثنى من الإلزام
-        },
-        en: {
-            name: "",
-            governorate: "",
-            category: "",
-            period: "", // مستثنى من الإلزام
-            short: "",
-            description: "",
-            tip: "", // مستثنى من الإلزام
-        },
-        images: [{ ...initialImage }],
-    };
-
-    const [formData, setFormData] = useState({
-        ar: {
-            eyebrow: "",
-            title: "",
-            subtitle: "",
-            description: "",
-        },
-        en: {
-            eyebrow: "",
-            title: "",
-            subtitle: "",
-            description: "",
-        },
-        stops: [{ ...initialStop }],
+    // 1. قراءة البيانات المحفوظة من localStorage عند فتح الصفحة لأول مرة
+    const [formData, setFormData] = useState(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const savedDraft = localStorage.getItem(STORAGE_KEY);
+                if (savedDraft) {
+                    return JSON.parse(savedDraft);
+                }
+            } catch (error) {
+                console.error("خطأ في استرجاع مسودة الرحلة:", error);
+            }
+        }
+        return getInitialFormData();
     });
+
+    // 2. حفظ التعديلات تلقائياً في localStorage مع كل تغيير في formData
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        } catch (error) {
+            console.error("خطأ في حفظ مسودة الرحلة:", error);
+        }
+    }, [formData]);
+
+    // دالة مسح المسودة يدوياً إذا أراد المستخدم البدء من جديد
+    const handleClearDraft = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        setFormData(getInitialFormData());
+        setStatus({ type: "", message: "" });
+    };
 
     // تحديث الحقول الرئيسية للرحلة (ar أو en)
     const handleMainChange = (lang, field, value) => {
@@ -80,10 +118,7 @@ const AddNewTripPage = () => {
     const handleAddStop = () => {
         setFormData(prev => ({
             ...prev,
-            stops: [
-                ...prev.stops,
-                { ...initialStop, id: Date.now().toString() },
-            ],
+            stops: [...prev.stops, createInitialStop()],
         }));
     };
 
@@ -96,44 +131,79 @@ const AddNewTripPage = () => {
 
     // تحديث بيانات محطة معينة (داخل لغة معينة ar أو en، أو الحقول المشتركة)
     const handleStopFieldChange = (index, lang, field, value) => {
-        const updatedStops = [...formData.stops];
-        if (lang === "common") {
-            updatedStops[index][field] = value;
-        } else {
-            updatedStops[index][lang][field] = value;
-        }
-        setFormData(prev => ({ ...prev, stops: updatedStops }));
+        setFormData(prev => {
+            const updatedStops = [...prev.stops];
+            if (lang === "common") {
+                updatedStops[index] = {
+                    ...updatedStops[index],
+                    [field]: value,
+                };
+            } else {
+                updatedStops[index] = {
+                    ...updatedStops[index],
+                    [lang]: {
+                        ...updatedStops[index][lang],
+                        [field]: value,
+                    },
+                };
+            }
+            return { ...prev, stops: updatedStops };
+        });
     };
 
     // إضافة صورة جديدة لمحطة معينة
     const handleAddImage = stopIndex => {
-        const updatedStops = [...formData.stops];
-        updatedStops[stopIndex].images.push({
-            src: "",
-            alt: { ar: "", en: "" },
+        setFormData(prev => {
+            const updatedStops = [...prev.stops];
+            updatedStops[stopIndex] = {
+                ...updatedStops[stopIndex],
+                images: [...updatedStops[stopIndex].images, createInitialImage()],
+            };
+            return { ...prev, stops: updatedStops };
         });
-        setFormData(prev => ({ ...prev, stops: updatedStops }));
     };
 
     // حذف صورة من محطة معينة
     const handleRemoveImage = (stopIndex, imgIndex) => {
-        const updatedStops = [...formData.stops];
-        if (updatedStops[stopIndex].images.length === 1) return;
-        updatedStops[stopIndex].images = updatedStops[stopIndex].images.filter(
-            (_, i) => i !== imgIndex,
-        );
-        setFormData(prev => ({ ...prev, stops: updatedStops }));
+        setFormData(prev => {
+            const updatedStops = [...prev.stops];
+            if (updatedStops[stopIndex].images.length === 1) return prev;
+            updatedStops[stopIndex] = {
+                ...updatedStops[stopIndex],
+                images: updatedStops[stopIndex].images.filter((_, i) => i !== imgIndex),
+            };
+            return { ...prev, stops: updatedStops };
+        });
     };
 
     // تحديث صورة معينة (src أو alt.ar أو alt.en)
     const handleImageChange = (stopIndex, imgIndex, field, value) => {
-        const updatedStops = [...formData.stops];
-        if (field === "src") {
-            updatedStops[stopIndex].images[imgIndex].src = value;
-        } else {
-            updatedStops[stopIndex].images[imgIndex].alt[field] = value;
-        }
-        setFormData(prev => ({ ...prev, stops: updatedStops }));
+        setFormData(prev => {
+            const updatedStops = [...prev.stops];
+            const updatedImages = [...updatedStops[stopIndex].images];
+
+            if (field === "src") {
+                updatedImages[imgIndex] = {
+                    ...updatedImages[imgIndex],
+                    src: value,
+                };
+            } else {
+                updatedImages[imgIndex] = {
+                    ...updatedImages[imgIndex],
+                    alt: {
+                        ...updatedImages[imgIndex].alt,
+                        [field]: value,
+                    },
+                };
+            }
+
+            updatedStops[stopIndex] = {
+                ...updatedStops[stopIndex],
+                images: updatedImages,
+            };
+
+            return { ...prev, stops: updatedStops };
+        });
     };
 
     const handleSubmit = async e => {
@@ -166,7 +236,7 @@ const AddNewTripPage = () => {
             const stop = formData.stops[i];
 
             // التحقق من الحقول المشتركة للمحطة (الإحداثيات ورابط الخريطة)
-            if (!stop.lat.trim() || !stop.lng.trim() || !stop.mapURL.trim()) {
+            if (!String(stop.lat).trim() || !String(stop.lng).trim() || !stop.mapURL.trim()) {
                 setStatus({
                     type: "error",
                     message: `يرجى ملء إحداثيات ورابط الخريطة للمحطة رقم ${i + 1}.`,
@@ -243,15 +313,13 @@ const AddNewTripPage = () => {
 
             await addTrip(payload);
 
+            // 3. مسح المسودة من localStorage وتصفير النموذج بعد نجاح الإرسال
+            localStorage.removeItem(STORAGE_KEY);
+            setFormData(getInitialFormData());
+
             setStatus({
                 type: "success",
-                message: "تمت إضافة الرحلة بنجاح وبدعم كامل للغتين!",
-            });
-
-            setFormData({
-                ar: { eyebrow: "", title: "", subtitle: "", description: "" },
-                en: { eyebrow: "", title: "", subtitle: "", description: "" },
-                stops: [{ ...initialStop, id: Date.now().toString() }],
+                message: "تمت إضافة الرحلة بنجاح وبدعم كامل للغتين، وتم تفريغ المسودة!",
             });
         } catch (error) {
             setStatus({
@@ -278,13 +346,24 @@ const AddNewTripPage = () => {
                                 لوحة إضافة رحلة ثنائية اللغة
                             </h1>
                             <p className="text-gray-500 text-sm mt-1">
-                                أضف تفاصيل رحلتك ومحطاتها باللغتين العربية والإنجليزية لتعمل المنصة بكل مرونة.
+                                أضف تفاصيل رحلتك ومحطاتها باللغتين العربية والإنجليزية (يتم حفظ المسودة تلقائياً).
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-accent/5 border border-accent/20 px-4 py-2 rounded-xl text-accent text-sm font-bold">
-                        <Globe size={18} />
-                        <span>عربي / English</span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleClearDraft}
+                            title="تفريغ الحقول والبدء من جديد"
+                            className="flex items-center gap-1.5 bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-200 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        >
+                            <RotateCcw size={15} />
+                            <span>تفريغ المسودة</span>
+                        </button>
+                        <div className="flex items-center gap-2 bg-accent/5 border border-accent/20 px-4 py-2 rounded-xl text-accent text-sm font-bold">
+                            <Globe size={18} />
+                            <span>عربي / English</span>
+                        </div>
                     </div>
                 </div>
 
@@ -540,24 +619,24 @@ const AddNewTripPage = () => {
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-600 mb-1">التصنيف (Category AR)</label>
                                                     <select
-  className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800"
-  value={stop.ar.category}
-  onChange={e => handleStopFieldChange(stopIndex, "ar", "category", e.target.value)}
->
-  <option value="" disabled>اختر نوع المكان...</option>
-  <option value="museum">متحف</option>
-  <option value="landmark">معلم سياحي / أثري</option>
-  <option value="restaurant">مطعم</option>
-  <option value="cafe">مقهى / كافيه</option>
-  <option value="park">حديقة عامة</option>
-  <option value="beach">شاطئ / كورنيش</option>
-  <option value="sweets">متجر حلوى</option>
-  <option value="rest_stop">استراحة</option>
-  <option value="supermarket">سوبر ماركت</option>
-  <option value="mall">مركز تسوق / مول</option>
-  <option value="hotel">فندق / مكان إقامة</option>
-  <option value="other">أخرى</option>
-</select>
+                                                        className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800"
+                                                        value={stop.ar.category}
+                                                        onChange={e => handleStopFieldChange(stopIndex, "ar", "category", e.target.value)}
+                                                    >
+                                                        <option value="" disabled>اختر نوع المكان...</option>
+                                                        <option value="museum">متحف</option>
+                                                        <option value="landmark">معلم سياحي / أثري</option>
+                                                        <option value="restaurant">مطعم</option>
+                                                        <option value="cafe">مقهى / كافيه</option>
+                                                        <option value="park">حديقة عامة</option>
+                                                        <option value="beach">شاطئ / كورنيش</option>
+                                                        <option value="sweets">متجر حلوى</option>
+                                                        <option value="rest_stop">استراحة</option>
+                                                        <option value="supermarket">سوبر ماركت</option>
+                                                        <option value="mall">مركز تسوق / مول</option>
+                                                        <option value="hotel">فندق / مكان إقامة</option>
+                                                        <option value="other">أخرى</option>
+                                                    </select>
                                                 </div>
                                             </div>
 
@@ -637,24 +716,24 @@ const AddNewTripPage = () => {
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">Category (EN)</label>
                                                     <select
-  className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800 text-left"
-  value={stop.en.category}
-  onChange={e => handleStopFieldChange(stopIndex, "en", "category", e.target.value)}
->
-  <option value="" disabled>Select category...</option>
-  <option value="museum">Museum</option>
-  <option value="landmark">Landmark / Tourist Spot</option>
-  <option value="restaurant">Restaurant</option>
-  <option value="cafe">Café</option>
-  <option value="park">Park</option>
-  <option value="beach">Beach / Corniche</option>
-  <option value="sweets">Sweets Shop</option>
-  <option value="rest_stop">Rest Stop</option>
-  <option value="supermarket">Supermarket</option>
-  <option value="mall">Shopping Mall</option>
-  <option value="hotel">Hotel</option>
-  <option value="other">Other</option>
-</select>
+                                                        className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent bg-white text-gray-800 text-left"
+                                                        value={stop.en.category}
+                                                        onChange={e => handleStopFieldChange(stopIndex, "en", "category", e.target.value)}
+                                                    >
+                                                        <option value="" disabled>Select category...</option>
+                                                        <option value="museum">Museum</option>
+                                                        <option value="landmark">Landmark / Tourist Spot</option>
+                                                        <option value="restaurant">Restaurant</option>
+                                                        <option value="cafe">Café</option>
+                                                        <option value="park">Park</option>
+                                                        <option value="beach">Beach / Corniche</option>
+                                                        <option value="sweets">Sweets Shop</option>
+                                                        <option value="rest_stop">Rest Stop</option>
+                                                        <option value="supermarket">Supermarket</option>
+                                                        <option value="mall">Shopping Mall</option>
+                                                        <option value="hotel">Hotel</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
                                                 </div>
                                             </div>
 
