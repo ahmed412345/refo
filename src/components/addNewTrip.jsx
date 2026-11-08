@@ -1167,7 +1167,7 @@ const AddNewTripPage = () => {
                         </button>
                     </div>
                 </form>
-            </div>
+            </div> 
         </div>
     );
 };
