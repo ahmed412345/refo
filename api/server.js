@@ -1,19 +1,18 @@
 /* Created by Ahmed Eltahan - 2026 */
 import mongoConnect from "./config/connectDB.js";
-
-import tripRouter from "./routes/trip.route.js";
-import museumRouter from "./routes/museum.route.js";
+import { addTrip } from "./controllers/trip.js";
+import { addMuseum } from "./controllers/museum.js";
 import express from "express";
 import cors from "cors";
-
 
 const app = express();
 app.use(cors());
 
 app.use(express.json());
 
-app.use("/api", tripRouter);
-app.use("/api", museumRouter);
+app.post("/api/trip", addTrip);
+app.post("/api/museums", addMuseum);
+app.post("/api/museum", addMuseum);
 
 const startServer = async () => {
     //connect to database
