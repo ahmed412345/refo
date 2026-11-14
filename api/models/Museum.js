@@ -41,6 +41,11 @@ const localizedContentSchema = new Schema(
             type: String,
             trim: true,
         },
+        workingDays: {
+            // جديد: أيام العمل (مثال: يومياً طوال أيام الأسبوع / من السبت إلى الخميس)
+            type: String,
+            trim: true,
+        },
         accessibility: {
             // من عمود "accessbility (توفير مسارات لذوى الهمم ، مرشديين)"
             // قسم السطور لعناصر جوه المصفوفة، مثلاً: ["مصعد", "بطاقات برايل", "مدخل بمنحدر"]

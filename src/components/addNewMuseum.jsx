@@ -56,6 +56,7 @@ const createEmptyForm = () => ({
         openingDate: "",
         renovationHistory: "",
         capacity: "",
+        workingDays: "",
         accessibility: [""],
         highlights: [""],
     },
@@ -67,6 +68,7 @@ const createEmptyForm = () => ({
         openingDate: "",
         renovationHistory: "",
         capacity: "",
+        workingDays: "",
         accessibility: [""],
         highlights: [""],
     },
@@ -415,6 +417,7 @@ const AddNewMuseumPage = () => {
                 openingDate: formData[langKey].openingDate.trim(),
                 renovationHistory: formData[langKey].renovationHistory.trim(),
                 capacity: formData[langKey].capacity.trim(),
+                workingDays: formData[langKey].workingDays.trim(),
                 accessibility: formData[langKey].accessibility
                     .map((item) => item.trim())
                     .filter(Boolean),
@@ -676,6 +679,25 @@ const AddNewMuseumPage = () => {
                                         }
                                     />
                                 </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        أيام العمل (Working Days AR)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="مثال: يومياً طوال أيام الأسبوع (من السبت إلى الجمعة)"
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
+                                        value={formData.ar.workingDays}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "ar",
+                                                "workingDays",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
                             </div>
 
                             {/* العمود الإنجليزي */}
@@ -823,6 +845,25 @@ const AddNewMuseumPage = () => {
                                             handleMainChange(
                                                 "en",
                                                 "capacity",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        Working Days (EN)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Daily (Saturday to Friday)"
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
+                                        value={formData.en.workingDays}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "en",
+                                                "workingDays",
                                                 e.target.value,
                                             )
                                         }

@@ -28,6 +28,7 @@ export const addMuseum = async (req, res) => {
                 langObj.openingDate,
                 langObj.renovationHistory,
                 langObj.capacity,
+                langObj.workingDays,
             ];
 
             stringFields.forEach((field) => {
