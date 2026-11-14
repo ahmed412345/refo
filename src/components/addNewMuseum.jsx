@@ -14,11 +14,12 @@ import {
     Ticket,
     Layers,
     Calendar,
-    Users,
+    Sparkles,
+    Accessibility,
 } from "lucide-react";
 import { addMuseum } from "../services/addMuseum";
 
-const DRAFT_KEY = "add-museum-draft-v1";
+const DRAFT_KEY = "add-museum-draft-v2";
 
 const createCollectionItem = () => ({
     id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
@@ -52,24 +53,34 @@ const createEmptyForm = () => ({
         about: "",
         type: "",
         owner: "",
+        openingDate: "",
+        renovationHistory: "",
+        capacity: "",
+        accessibility: [""],
+        highlights: [""],
     },
     en: {
         name: "",
         about: "",
         type: "",
         owner: "",
+        openingDate: "",
+        renovationHistory: "",
+        capacity: "",
+        accessibility: [""],
+        highlights: [""],
     },
     lng: "",
     lat: "",
-    openingDate: "",
-    capacity: "",
     workTime: {
         open: { time: "" },
         close: { time: "" },
     },
     ticketsPrice: {
         egyptian: "",
-        else: "",
+        egyptianStudent: "",
+        foreigner: "",
+        foreignerStudent: "",
     },
     pics: [""],
     collections: [createCollectionItem()],
@@ -85,6 +96,8 @@ const loadDraft = () => {
             if (
                 parsed?.ar &&
                 parsed?.en &&
+                Array.isArray(parsed.ar.accessibility) &&
+                Array.isArray(parsed.ar.highlights) &&
                 Array.isArray(parsed.pics) &&
                 Array.isArray(parsed.collections) &&
                 Array.isArray(parsed.events)
@@ -118,9 +131,9 @@ const AddNewMuseumPage = () => {
         }
     }, [formData]);
 
-    // تحديث الحقول الرئيسية للمتحف (ar أو en)
+    // تحديث الحقول النصية المباشرة للمتحف (ar أو en)
     const handleMainChange = (lang, field, value) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [lang]: {
                 ...prev[lang],
@@ -129,9 +142,47 @@ const AddNewMuseumPage = () => {
         }));
     };
 
-    // تحديث الحقول الثابتة المباشرة (lng, lat, openingDate, capacity)
+    // إدارة المصفوفات النصية داخل ar و en (accessibility & highlights)
+    const handleAddLocalizedArrayItem = (lang, field) => {
+        setFormData((prev) => ({
+            ...prev,
+            [lang]: {
+                ...prev[lang],
+                [field]: [...prev[lang][field], ""],
+            },
+        }));
+    };
+
+    const handleRemoveLocalizedArrayItem = (lang, field, index) => {
+        setFormData((prev) => {
+            if (prev[lang][field].length === 1) return prev;
+            return {
+                ...prev,
+                [lang]: {
+                    ...prev[lang],
+                    [field]: prev[lang][field].filter((_, i) => i !== index),
+                },
+            };
+        });
+    };
+
+    const handleLocalizedArrayItemChange = (lang, field, index, value) => {
+        setFormData((prev) => {
+            const updatedArr = [...prev[lang][field]];
+            updatedArr[index] = value;
+            return {
+                ...prev,
+                [lang]: {
+                    ...prev[lang],
+                    [field]: updatedArr,
+                },
+            };
+        });
+    };
+
+    // تحديث الحقول الثابتة المباشرة (lng, lat)
     const handleStaticChange = (field, value) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [field]: value,
         }));
@@ -139,7 +190,7 @@ const AddNewMuseumPage = () => {
 
     // تحديث مواعيد العمل (open أو close)
     const handleWorkTimeChange = (type, value) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             workTime: {
                 ...prev.workTime,
@@ -148,9 +199,9 @@ const AddNewMuseumPage = () => {
         }));
     };
 
-    // تحديث أسعار التذاكر (egyptian أو else)
+    // تحديث أسعار التذاكر
     const handleTicketPriceChange = (type, value) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             ticketsPrice: {
                 ...prev.ticketsPrice,
@@ -161,15 +212,15 @@ const AddNewMuseumPage = () => {
 
     // إدارة صور المتحف (pics)
     const handleAddPic = () => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             pics: [...prev.pics, ""],
         }));
     };
 
-    const handleRemovePic = index => {
+    const handleRemovePic = (index) => {
         if (formData.pics.length === 1) return;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             pics: prev.pics.filter((_, i) => i !== index),
         }));
@@ -178,27 +229,27 @@ const AddNewMuseumPage = () => {
     const handlePicChange = (index, value) => {
         const updatedPics = [...formData.pics];
         updatedPics[index] = value;
-        setFormData(prev => ({ ...prev, pics: updatedPics }));
+        setFormData((prev) => ({ ...prev, pics: updatedPics }));
     };
 
     // إدارة المقتنيات والمجموعات (collectionData)
     const handleAddCollection = () => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             collections: [...prev.collections, createCollectionItem()],
         }));
     };
 
-    const handleRemoveCollection = index => {
+    const handleRemoveCollection = (index) => {
         if (formData.collections.length === 1) return;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             collections: prev.collections.filter((_, i) => i !== index),
         }));
     };
 
     const handleCollectionFieldChange = (index, lang, field, value) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const updated = [...prev.collections];
             updated[index] = {
                 ...updated[index],
@@ -213,7 +264,7 @@ const AddNewMuseumPage = () => {
 
     // إدارة العناصر الفرعية داخل كل مجموعة (subCollection)
     const handleAddSubCollection = (colIndex, lang) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const updated = [...prev.collections];
             updated[colIndex] = {
                 ...updated[colIndex],
@@ -230,7 +281,7 @@ const AddNewMuseumPage = () => {
     };
 
     const handleRemoveSubCollection = (colIndex, lang, subIndex) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const updated = [...prev.collections];
             if (updated[colIndex][lang].subCollection.length === 1) return prev;
             updated[colIndex] = {
@@ -247,7 +298,7 @@ const AddNewMuseumPage = () => {
     };
 
     const handleSubCollectionChange = (colIndex, lang, subIndex, value) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const updated = [...prev.collections];
             const updatedSubs = [...updated[colIndex][lang].subCollection];
             updatedSubs[subIndex] = value;
@@ -264,22 +315,22 @@ const AddNewMuseumPage = () => {
 
     // إدارة الفعاليات والمعارض (eventsAndExhibitions)
     const handleAddEvent = () => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             events: [...prev.events, createEventItem()],
         }));
     };
 
-    const handleRemoveEvent = index => {
+    const handleRemoveEvent = (index) => {
         if (formData.events.length === 1) return;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             events: prev.events.filter((_, i) => i !== index),
         }));
     };
 
     const handleEventFieldChange = (index, lang, field, value) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const updated = [...prev.events];
             updated[index] = {
                 ...updated[index],
@@ -292,27 +343,25 @@ const AddNewMuseumPage = () => {
         });
     };
 
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 1. التحقق من الحقول الأساسية للمتحف باللغتين العربية والإنجليزية
+        // 1. التحقق من الحقول الإلزامية الأساسية باللغتين
         const isMainArComplete =
             formData.ar.name.trim() &&
             formData.ar.about.trim() &&
-            formData.ar.type.trim() &&
-            formData.ar.owner.trim();
+            formData.ar.type.trim();
 
         const isMainEnComplete =
             formData.en.name.trim() &&
             formData.en.about.trim() &&
-            formData.en.type.trim() &&
-            formData.en.owner.trim();
+            formData.en.type.trim();
 
         if (!isMainArComplete || !isMainEnComplete) {
             setStatus({
                 type: "error",
                 message:
-                    "يرجى ملء جميع البيانات الأساسية للمتحف (الاسم، النبذة، النوع، والجهة المالكة) باللغتين العربية والإنجليزية.",
+                    "يرجى ملء الحقول الإلزامية الأساسية (الاسم، النبذة، والتصنيف) باللغتين العربية والإنجليزية.",
             });
             return;
         }
@@ -338,124 +387,78 @@ const AddNewMuseumPage = () => {
             return;
         }
 
-        // 3. التحقق من البيانات الثابتة (تاريخ الافتتاح، السعة، مواعيد العمل، أسعار التذاكر)
+        // 3. التحقق من مواعيد العمل وأسعار التذاكر الأساسية
         if (
-            !formData.openingDate.trim() ||
-            !String(formData.capacity).trim() ||
             !formData.workTime.open.time.trim() ||
             !formData.workTime.close.time.trim() ||
             !String(formData.ticketsPrice.egyptian).trim() ||
-            !String(formData.ticketsPrice.else).trim()
+            !String(formData.ticketsPrice.foreigner).trim()
         ) {
             setStatus({
                 type: "error",
                 message:
-                    "يرجى استكمال كافة البيانات الثابتة (تاريخ الافتتاح، السعة الاستيعابية، مواعيد الفتح والإغلاق، وأسعار التذاكر).",
+                    "يرجى استكمال مواعيد الفتح والإغلاق وأسعار التذاكر الأساسية للمصريين والأجانب.",
             });
             return;
-        }
-
-        // 4. التحقق من صور المتحف (pics)
-        for (let i = 0; i < formData.pics.length; i++) {
-            if (!formData.pics[i].trim()) {
-                setStatus({
-                    type: "error",
-                    message: `يرجى إدخال رابط الصورة رقم ${i + 1} أو حذف الحقل الفارغ.`,
-                });
-                return;
-            }
-        }
-
-        // 5. التحقق من المجموعات والمقتنيات (collectionData)
-        for (let i = 0; i < formData.collections.length; i++) {
-            const col = formData.collections[i];
-            const isColArValid =
-                col.ar.name.trim() &&
-                col.ar.description.trim() &&
-                col.ar.subCollection.every(sub => sub.trim() !== "");
-            const isColEnValid =
-                col.en.name.trim() &&
-                col.en.description.trim() &&
-                col.en.subCollection.every(sub => sub.trim() !== "");
-
-            if (!isColArValid || !isColEnValid) {
-                setStatus({
-                    type: "error",
-                    message: `يرجى ملء كافة بيانات المجموعة رقم ${i + 1} (الاسم، الوصف، والمقتنيات الفرعية) باللغتين العربية والإنجليزية.`,
-                });
-                return;
-            }
-        }
-
-        // 6. التحقق من الفعاليات والمعارض (eventsAndExhibitions)
-        for (let i = 0; i < formData.events.length; i++) {
-            const ev = formData.events[i];
-            const isEvArValid =
-                ev.ar.title.trim() && ev.ar.description.trim();
-            const isEvEnValid =
-                ev.en.title.trim() && ev.en.description.trim();
-
-            if (!isEvArValid || !isEvEnValid) {
-                setStatus({
-                    type: "error",
-                    message: `يرجى ملء عنوان ووصف الفعالية / المعرض رقم ${i + 1} باللغتين العربية والإنجليزية.`,
-                });
-                return;
-            }
         }
 
         setLoading(true);
         setStatus({ type: "", message: "" });
 
         try {
-            // تجهيز البيانات بنفس هيكل اسكيما Museum.js تماماً
+            // تجهيز البيانات بنفس هيكل اسكيما Museum.js الجديدة تماماً
+            const formatLocalizedPayload = (langKey) => ({
+                name: formData[langKey].name.trim(),
+                about: formData[langKey].about.trim(),
+                type: formData[langKey].type.trim(),
+                owner: formData[langKey].owner.trim(),
+                openingDate: formData[langKey].openingDate.trim(),
+                renovationHistory: formData[langKey].renovationHistory.trim(),
+                capacity: formData[langKey].capacity.trim(),
+                accessibility: formData[langKey].accessibility
+                    .map((item) => item.trim())
+                    .filter(Boolean),
+                highlights: formData[langKey].highlights
+                    .map((item) => item.trim())
+                    .filter(Boolean),
+                collectionData: formData.collections
+                    .map((col) => ({
+                        name: col[langKey].name.trim(),
+                        description: col[langKey].description.trim(),
+                        subCollection: col[langKey].subCollection
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                    }))
+                    .filter((c) => c.name || c.description),
+                eventsAndExhibitions: formData.events
+                    .map((ev) => ({
+                        title: ev[langKey].title.trim(),
+                        description: ev[langKey].description.trim(),
+                    }))
+                    .filter((e) => e.title || e.description),
+            });
+
             const payload = {
-                ar: {
-                    name: formData.ar.name.trim(),
-                    about: formData.ar.about.trim(),
-                    type: formData.ar.type.trim(),
-                    owner: formData.ar.owner.trim(),
-                    collectionData: formData.collections.map(col => ({
-                        name: col.ar.name.trim(),
-                        description: col.ar.description.trim(),
-                        subCollection: col.ar.subCollection
-                            .map(s => s.trim())
-                            .filter(Boolean),
-                    })),
-                    eventsAndExhibitions: formData.events.map(ev => ({
-                        title: ev.ar.title.trim(),
-                        description: ev.ar.description.trim(),
-                    })),
-                },
-                en: {
-                    name: formData.en.name.trim(),
-                    about: formData.en.about.trim(),
-                    type: formData.en.type.trim(),
-                    owner: formData.en.owner.trim(),
-                    collectionData: formData.collections.map(col => ({
-                        name: col.en.name.trim(),
-                        description: col.en.description.trim(),
-                        subCollection: col.en.subCollection
-                            .map(s => s.trim())
-                            .filter(Boolean),
-                    })),
-                    eventsAndExhibitions: formData.events.map(ev => ({
-                        title: ev.en.title.trim(),
-                        description: ev.en.description.trim(),
-                    })),
-                },
-                locationOnMap: [lngNum, latNum], // [longitude, latitude]
-                openingDate: formData.openingDate.trim(),
-                capacity: Number(formData.capacity),
+                ar: formatLocalizedPayload("ar"),
+                en: formatLocalizedPayload("en"),
+                locationOnMap: [lngNum, latNum],
                 workTime: {
                     open: { time: formData.workTime.open.time.trim() },
                     close: { time: formData.workTime.close.time.trim() },
                 },
                 ticketsPrice: {
-                    egyptian: Number(formData.ticketsPrice.egyptian),
-                    else: Number(formData.ticketsPrice.else),
+                    egyptian: Number(formData.ticketsPrice.egyptian) || 0,
+                    egyptianStudent:
+                        formData.ticketsPrice.egyptianStudent !== ""
+                            ? Number(formData.ticketsPrice.egyptianStudent)
+                            : undefined,
+                    foreigner: Number(formData.ticketsPrice.foreigner) || 0,
+                    foreignerStudent:
+                        formData.ticketsPrice.foreignerStudent !== ""
+                            ? Number(formData.ticketsPrice.foreignerStudent)
+                            : undefined,
                 },
-                pics: formData.pics.map(p => p.trim()).filter(Boolean),
+                pics: formData.pics.map((p) => p.trim()).filter(Boolean),
             };
 
             await addMuseum(payload);
@@ -466,7 +469,6 @@ const AddNewMuseumPage = () => {
                     "تمت إضافة بيانات المتحف وتوليد الكلمات المفتاحية بنجاح وبدعم كامل للغتين!",
             });
 
-            // مسح المسودة وتفريغ النموذج بعد النجاح
             try {
                 localStorage.removeItem(DRAFT_KEY);
             } catch {
@@ -489,8 +491,8 @@ const AddNewMuseumPage = () => {
             className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/50 to-gray-50 py-10 px-4 sm:px-6 lg:px-8 dir-rtl"
             dir="rtl"
         >
-            <div className="max-w-5xl mx-auto">
-                {/* الهيدر الفخم */}
+            <div className="max-w-6xl mx-auto">
+                {/* الهيدر */}
                 <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                         <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
@@ -501,9 +503,8 @@ const AddNewMuseumPage = () => {
                                 لوحة إضافة متحف ثنائي اللغة
                             </h1>
                             <p className="text-gray-500 text-sm mt-1">
-                                أضف بيانات المتحف ومقتنياته وفعالياته باللغتين
-                                العربية والإنجليزية مع توليد تلقائي للكلمات
-                                المفتاحية.
+                                أضف بيانات المتحف وتاريخه ومميزاته ومقتنياته
+                                باللغتين العربية والإنجليزية.
                             </p>
                         </div>
                     </div>
@@ -514,13 +515,13 @@ const AddNewMuseumPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* 1. قسم التفاصيل الأساسية للمتحف */}
+                    {/* 1. قسم البيانات الأساسية والتاريخية (صناديق نصية كبيرة) */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
                         <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
                             <span className="w-3 h-3 rounded-full bg-accent"></span>
                             <h2 className="text-xl font-bold text-gray-800">
-                                1. البيانات الأساسية للمتحف (Main Museum
-                                Details)
+                                1. البيانات الأساسية والتاريخية للمتحف (Main &
+                                Historical Info)
                             </h2>
                         </div>
 
@@ -531,40 +532,42 @@ const AddNewMuseumPage = () => {
                                     <span>🇸🇦 البيانات بالعربية (Arabic)</span>
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                        اسم المتحف (Name AR){" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="مثال: المتحف المصري الكبير"
-                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all font-medium"
-                                        value={formData.ar.name}
-                                        onChange={e =>
-                                            handleMainChange(
-                                                "ar",
-                                                "name",
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            نوع المتحف (Type AR){" "}
+                                            اسم المتحف (Name AR){" "}
                                             <span className="text-red-500">
                                                 *
                                             </span>
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder="مثال: أثري / تاريخي"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all"
+                                            placeholder="مثال: المتحف المصري بالقاهرة"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
+                                            value={formData.ar.name}
+                                            onChange={(e) =>
+                                                handleMainChange(
+                                                    "ar",
+                                                    "name",
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            تصنيف المتحف (Type AR){" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="مثال: متحف أثري / قومي"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
                                             value={formData.ar.type}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 handleMainChange(
                                                     "ar",
                                                     "type",
@@ -573,44 +576,101 @@ const AddNewMuseumPage = () => {
                                             }
                                         />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            الجهة المالكة (Owner AR){" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="مثال: وزارة السياحة والآثار"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all"
-                                            value={formData.ar.owner}
-                                            onChange={e =>
-                                                handleMainChange(
-                                                    "ar",
-                                                    "owner",
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                        نبذة عن المتحف (About AR){" "}
+                                        نبذة مختصرة عن المتحف (About AR){" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
-                                        placeholder="اكتب نبذة شاملة عن تاريخ وأهمية المتحف باللغة العربية..."
                                         rows="4"
-                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-none text-sm transition-all"
+                                        placeholder="اكتب نبذة شاملة عن المتحف وأهميته..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
                                         value={formData.ar.about}
-                                        onChange={e =>
+                                        onChange={(e) =>
                                             handleMainChange(
                                                 "ar",
                                                 "about",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        المؤسسة أو الجهة التابع لها (Owner AR)
+                                    </label>
+                                    <textarea
+                                        rows="2"
+                                        placeholder="مثال: وزارة السياحة والآثار - المجلس الأعلى للآثار..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.ar.owner}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "ar",
+                                                "owner",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        تاريخ التأسيس والافتتاح (Opening Date &
+                                        Foundation AR)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        placeholder="مثال: وضع حجر الأساس سنة 1897 وافتتح رسمياً 15 نوفمبر 1902..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.ar.openingDate}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "ar",
+                                                "openingDate",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        تاريخ التطوير والترميم (Renovation
+                                        History AR)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        placeholder="مثال: شهد المتحف مشروع تطوير شامل عام 2012..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.ar.renovationHistory}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "ar",
+                                                "renovationHistory",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        المساحة الكلية وعدد القاعات (Capacity &
+                                        Area AR)
+                                    </label>
+                                    <textarea
+                                        rows="2"
+                                        placeholder="مثال: المساحة 13600 متر مربع، يضم أكثر من 100 قاعة عرض..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.ar.capacity}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "ar",
+                                                "capacity",
                                                 e.target.value,
                                             )
                                         }
@@ -623,36 +683,35 @@ const AddNewMuseumPage = () => {
                                 className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-4"
                                 dir="ltr"
                             >
-                                <div
-                                    className="flex items-center justify-between border-b border-gray-200 pb-2 text-blue-700 font-bold text-sm"
-                                    dir="ltr"
-                                >
+                                <div className="flex items-center justify-between border-b border-gray-200 pb-2 text-blue-700 font-bold text-sm">
                                     <span>🇬🇧 English Data (English)</span>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
-                                        Museum Name (EN){" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Grand Egyptian Museum"
-                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all text-left font-medium"
-                                        value={formData.en.name}
-                                        onChange={e =>
-                                            handleMainChange(
-                                                "en",
-                                                "name",
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            Museum Name (EN){" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. The Egyptian Museum in Cairo"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
+                                            value={formData.en.name}
+                                            onChange={(e) =>
+                                                handleMainChange(
+                                                    "en",
+                                                    "name",
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
                                             Museum Type (EN){" "}
                                             <span className="text-red-500">
                                                 *
@@ -660,10 +719,10 @@ const AddNewMuseumPage = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder="e.g. Archaeological / Historical"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all text-left"
+                                            placeholder="e.g. Archaeological / National Museum"
+                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm"
                                             value={formData.en.type}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 handleMainChange(
                                                     "en",
                                                     "type",
@@ -672,44 +731,98 @@ const AddNewMuseumPage = () => {
                                             }
                                         />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
-                                            Owner / Authority (EN){" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. Ministry of Tourism and Antiquities"
-                                            className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent text-sm transition-all text-left"
-                                            value={formData.en.owner}
-                                            onChange={e =>
-                                                handleMainChange(
-                                                    "en",
-                                                    "owner",
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
                                         About Museum (EN){" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
-                                        placeholder="Write a comprehensive overview of the museum in English..."
                                         rows="4"
-                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-none text-sm transition-all text-left"
+                                        placeholder="Write a comprehensive overview of the museum..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
                                         value={formData.en.about}
-                                        onChange={e =>
+                                        onChange={(e) =>
                                             handleMainChange(
                                                 "en",
                                                 "about",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        Owner / Supervising Authority (EN)
+                                    </label>
+                                    <textarea
+                                        rows="2"
+                                        placeholder="e.g. Ministry of Tourism and Antiquities - Supreme Council of Antiquities..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.en.owner}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "en",
+                                                "owner",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        Foundation & Opening Date (EN)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        placeholder="e.g. Foundation stone laid in 1897, officially opened on Nov 15, 1902..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.en.openingDate}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "en",
+                                                "openingDate",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        Renovation History (EN)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        placeholder="e.g. Reviving the Egyptian Museum Initiative launched in 2012..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.en.renovationHistory}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "en",
+                                                "renovationHistory",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        Total Area & Capacity (EN)
+                                    </label>
+                                    <textarea
+                                        rows="2"
+                                        placeholder="e.g. Total area of 13,600 sq meters, over 100 exhibition halls across 2 floors..."
+                                        className="w-full border border-gray-200 bg-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-accent resize-y text-sm"
+                                        value={formData.en.capacity}
+                                        onChange={(e) =>
+                                            handleMainChange(
+                                                "en",
+                                                "capacity",
                                                 e.target.value,
                                             )
                                         }
@@ -719,108 +832,349 @@ const AddNewMuseumPage = () => {
                         </div>
                     </div>
 
-                    {/* 2. قسم البيانات الثابتة (الموقع، المواعيد، التذاكر، السعة) */}
+                    {/* 2. قسم المميزات وخدمات ذوي الهمم (مصفوفات نصوص) */}
+                    <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
+                        {/* أولاً: أهم ما يميز المتحف (highlights) */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+                                <Sparkles className="text-accent" size={22} />
+                                <h2 className="text-xl font-bold text-gray-800">
+                                    2. أهم ما يميز المتحف وخدمات الإتاحة
+                                    (Highlights & Accessibility)
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* مميزات المتحف بالعربية */}
+                                <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
+                                    <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                                        <span className="text-xs font-bold text-emerald-700">
+                                            🇸🇦 أهم ما يميز المتحف (Highlights
+                                            AR)
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleAddLocalizedArrayItem(
+                                                    "ar",
+                                                    "highlights",
+                                                )
+                                            }
+                                            className="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Plus size={12} /> إضافة ميزة
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {formData.ar.highlights.map(
+                                            (item, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        placeholder={`ميزة #${idx + 1} (مثال: أقدم متحف أثري في الشرق الأوسط)`}
+                                                        className="flex-1 border border-gray-200 bg-white p-2.5 rounded-xl text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                        value={item}
+                                                        onChange={(e) =>
+                                                            handleLocalizedArrayItemChange(
+                                                                "ar",
+                                                                "highlights",
+                                                                idx,
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                    {formData.ar.highlights
+                                                        .length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleRemoveLocalizedArrayItem(
+                                                                    "ar",
+                                                                    "highlights",
+                                                                    idx,
+                                                                )
+                                                            }
+                                                            className="text-red-500 hover:text-red-700 p-2 rounded-xl bg-white border border-gray-200 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* مميزات المتحف بالإنجليزية */}
+                                <div
+                                    className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3"
+                                    dir="ltr"
+                                >
+                                    <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                                        <span className="text-xs font-bold text-blue-700">
+                                            🇬🇧 Museum Highlights (EN)
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleAddLocalizedArrayItem(
+                                                    "en",
+                                                    "highlights",
+                                                )
+                                            }
+                                            className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Plus size={12} /> Add Highlight
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {formData.en.highlights.map(
+                                            (item, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        placeholder={`Highlight #${idx + 1} (e.g. Oldest archaeological museum in the Middle East)`}
+                                                        className="flex-1 border border-gray-200 bg-white p-2.5 rounded-xl text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                        value={item}
+                                                        onChange={(e) =>
+                                                            handleLocalizedArrayItemChange(
+                                                                "en",
+                                                                "highlights",
+                                                                idx,
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                    {formData.en.highlights
+                                                        .length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleRemoveLocalizedArrayItem(
+                                                                    "en",
+                                                                    "highlights",
+                                                                    idx,
+                                                                )
+                                                            }
+                                                            className="text-red-500 hover:text-red-700 p-2 rounded-xl bg-white border border-gray-200 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ثانياً: خدمات ذوي الهمم والمرافق (accessibility) */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2 border-t border-gray-100">
+                            {/* خدمات الإتاحة بالعربية */}
+                            <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
+                                <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                                        <Accessibility size={15} />
+                                        🇸🇦 خدمات ذوي الهمم والمرافق
+                                        (Accessibility AR)
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleAddLocalizedArrayItem(
+                                                "ar",
+                                                "accessibility",
+                                            )
+                                        }
+                                        className="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                                    >
+                                        <Plus size={12} /> إضافة خدمة
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {formData.ar.accessibility.map(
+                                        (item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <input
+                                                    type="text"
+                                                    placeholder={`خدمة #${idx + 1} (مثال: مصعد، بطاقات بطريقة برايل، منحدر كراسي متحركة)`}
+                                                    className="flex-1 border border-gray-200 bg-white p-2.5 rounded-xl text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                    value={item}
+                                                    onChange={(e) =>
+                                                        handleLocalizedArrayItemChange(
+                                                            "ar",
+                                                            "accessibility",
+                                                            idx,
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                {formData.ar.accessibility
+                                                    .length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleRemoveLocalizedArrayItem(
+                                                                "ar",
+                                                                "accessibility",
+                                                                idx,
+                                                            )
+                                                        }
+                                                        className="text-red-500 hover:text-red-700 p-2 rounded-xl bg-white border border-gray-200 cursor-pointer"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* خدمات الإتاحة بالإنجليزية */}
+                            <div
+                                className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3"
+                                dir="ltr"
+                            >
+                                <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span className="text-xs font-bold text-blue-700 flex items-center gap-1">
+                                        <Accessibility size={15} />
+                                        🇬🇧 Accessibility & Facilities (EN)
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleAddLocalizedArrayItem(
+                                                "en",
+                                                "accessibility",
+                                            )
+                                        }
+                                        className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                                    >
+                                        <Plus size={12} /> Add Facility
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {formData.en.accessibility.map(
+                                        (item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Facility #${idx + 1} (e.g. Ramped Entrance, Elevator, Braille labels)`}
+                                                    className="flex-1 border border-gray-200 bg-white p-2.5 rounded-xl text-xs outline-none focus:ring-1 focus:ring-accent"
+                                                    value={item}
+                                                    onChange={(e) =>
+                                                        handleLocalizedArrayItemChange(
+                                                            "en",
+                                                            "accessibility",
+                                                            idx,
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                {formData.en.accessibility
+                                                    .length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleRemoveLocalizedArrayItem(
+                                                                "en",
+                                                                "accessibility",
+                                                                idx,
+                                                            )
+                                                        }
+                                                        className="text-red-500 hover:text-red-700 p-2 rounded-xl bg-white border border-gray-200 cursor-pointer"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 3. قسم البيانات الثابتة (الموقع على الخريطة، المواعيد، التذاكر، الصور) */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
                         <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
                             <MapPin className="text-accent" size={22} />
                             <h2 className="text-xl font-bold text-gray-800">
-                                2. الموقع والمواعيد والبيانات الثابتة (Static
+                                3. الإحداثيات والمواعيد والتذاكر (Static
                                 Details)
                             </h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {/* خط الطول Longitude */}
-                            <div className="bg-gray-50/60 p-4 rounded-2xl border border-gray-200/60">
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    خط الطول (Longitude){" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    step="any"
-                                    placeholder="مثال: 31.1225"
-                                    className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                    value={formData.lng}
-                                    onChange={e =>
-                                        handleStaticChange(
-                                            "lng",
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-
-                            {/* خط العرض Latitude */}
-                            <div className="bg-gray-50/60 p-4 rounded-2xl border border-gray-200/60">
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    خط العرض (Latitude){" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    step="any"
-                                    placeholder="مثال: 29.9942"
-                                    className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                    value={formData.lat}
-                                    onChange={e =>
-                                        handleStaticChange(
-                                            "lat",
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-
-                            {/* تاريخ الافتتاح */}
-                            <div className="bg-gray-50/60 p-4 rounded-2xl border border-gray-200/60">
-                                <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
-                                    <Calendar
-                                        size={14}
-                                        className="text-accent"
-                                    />
-                                    تاريخ الافتتاح (Opening Date){" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="مثال: 1902 أو 2025-11-01"
-                                    className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                    value={formData.openingDate}
-                                    onChange={e =>
-                                        handleStaticChange(
-                                            "openingDate",
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-
-                            {/* السعة الاستيعابية */}
-                            <div className="bg-gray-50/60 p-4 rounded-2xl border border-gray-200/60">
-                                <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
-                                    <Users size={14} className="text-accent" />
-                                    السعة الاستيعابية (Capacity){" "}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    placeholder="مثال: 15000"
-                                    className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                    value={formData.capacity}
-                                    onChange={e =>
-                                        handleStaticChange(
-                                            "capacity",
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                        </div>
-
-                        {/* مواعيد العمل وأسعار التذاكر */}
+                        {/* الإحداثيات ومواعيد العمل */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* إحداثيات الخريطة */}
+                            <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
+                                <div className="flex items-center gap-2 text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">
+                                    <MapPin size={18} className="text-accent" />
+                                    <span>
+                                        إحداثيات الخريطة (Location Coordinates)
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            خط الطول (Longitude){" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            placeholder="مثال: 31.2336"
+                                            className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                            value={formData.lng}
+                                            onChange={(e) =>
+                                                handleStaticChange(
+                                                    "lng",
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            خط العرض (Latitude){" "}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            placeholder="مثال: 30.0478"
+                                            className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                            value={formData.lat}
+                                            onChange={(e) =>
+                                                handleStaticChange(
+                                                    "lat",
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* مواعيد العمل */}
                             <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">
@@ -840,7 +1194,7 @@ const AddNewMuseumPage = () => {
                                             placeholder="مثال: 09:00 AM"
                                             className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
                                             value={formData.workTime.open.time}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 handleWorkTimeChange(
                                                     "open",
                                                     e.target.value,
@@ -860,7 +1214,7 @@ const AddNewMuseumPage = () => {
                                             placeholder="مثال: 05:00 PM"
                                             className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
                                             value={formData.workTime.close.time}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 handleWorkTimeChange(
                                                     "close",
                                                     e.target.value,
@@ -870,61 +1224,96 @@ const AddNewMuseumPage = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* أسعار التذاكر */}
-                            <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">
-                                    <Ticket size={18} className="text-accent" />
-                                    <span>أسعار التذاكر (Tickets Price)</span>
+                        {/* أسعار التذاكر (4 فئات) */}
+                        <div className="bg-gray-50/60 p-5 rounded-2xl border border-gray-200/60 space-y-3">
+                            <div className="flex items-center gap-2 text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">
+                                <Ticket size={18} className="text-accent" />
+                                <span>
+                                    أسعار التذاكر بالجنيه المصري (Tickets Price)
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        مصريين - كبار (Egyptian){" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="مثال: 30"
+                                        className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                        value={formData.ticketsPrice.egyptian}
+                                        onChange={(e) =>
+                                            handleTicketPriceChange(
+                                                "egyptian",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            سعر تذكرة المصريين (Egyptian){" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="any"
-                                            placeholder="مثال: 200"
-                                            className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                            value={
-                                                formData.ticketsPrice.egyptian
-                                            }
-                                            onChange={e =>
-                                                handleTicketPriceChange(
-                                                    "egyptian",
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                            سعر تذكرة الأجانب (Foreigners /
-                                            Else){" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="any"
-                                            placeholder="مثال: 1200"
-                                            className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
-                                            value={formData.ticketsPrice.else}
-                                            onChange={e =>
-                                                handleTicketPriceChange(
-                                                    "else",
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        مصريين - طلاب (Egyptian Student)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="مثال: 10"
+                                        className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                        value={
+                                            formData.ticketsPrice
+                                                .egyptianStudent
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketPriceChange(
+                                                "egyptianStudent",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        أجانب - كبار (Foreigner){" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="مثال: 550"
+                                        className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                        value={formData.ticketsPrice.foreigner}
+                                        onChange={(e) =>
+                                            handleTicketPriceChange(
+                                                "foreigner",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                        أجانب - طلاب (Foreigner Student)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="مثال: 275"
+                                        className="w-full border border-gray-200 bg-white p-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-accent"
+                                        value={
+                                            formData.ticketsPrice
+                                                .foreignerStudent
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketPriceChange(
+                                                "foreignerStudent",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -958,11 +1347,11 @@ const AddNewMuseumPage = () => {
                                     >
                                         <input
                                             type="url"
-                                            placeholder={`رابط الصورة المباشر رقم #${index + 1} (https://...) *`}
+                                            placeholder={`رابط الصورة المباشر رقم #${index + 1} (https://...)`}
                                             className="flex-1 border border-gray-200 bg-white p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-accent font-mono"
                                             dir="ltr"
                                             value={picUrl}
-                                            onChange={e =>
+                                            onChange={(e) =>
                                                 handlePicChange(
                                                     index,
                                                     e.target.value,
@@ -987,13 +1376,13 @@ const AddNewMuseumPage = () => {
                         </div>
                     </div>
 
-                    {/* 3. قسم المجموعات والمقتنيات (collectionData) */}
+                    {/* 4. قسم تخصص المجموعات المتحفية (collectionData) */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
                             <div className="flex items-center gap-2">
                                 <Layers className="text-accent" size={22} />
                                 <h2 className="text-xl font-bold text-gray-800">
-                                    3. المجموعات والمقتنيات الأثرية (
+                                    4. تخصص المجموعات المتحفية (
                                     {formData.collections.length})
                                 </h2>
                             </div>
@@ -1002,7 +1391,7 @@ const AddNewMuseumPage = () => {
                                 onClick={handleAddCollection}
                                 className="bg-accent text-white hover:bg-opacity-90 px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
                             >
-                                <Plus size={18} /> إضافة مجموعة مقتنيات جديدة
+                                <Plus size={18} /> إضافة مجموعة جديدة
                             </button>
                         </div>
 
@@ -1010,9 +1399,8 @@ const AddNewMuseumPage = () => {
                             {formData.collections.map((col, colIndex) => (
                                 <div
                                     key={col.id || colIndex}
-                                    className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-3xl relative flex flex-col gap-6 transition-all hover:border-gray-300 shadow-xs"
+                                    className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-3xl relative flex flex-col gap-6"
                                 >
-                                    {/* رأس المجموعة */}
                                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
                                         <span className="text-sm font-black text-accent bg-accent/10 px-3.5 py-1.5 rounded-xl">
                                             المجموعة رقم #{colIndex + 1}
@@ -1033,7 +1421,6 @@ const AddNewMuseumPage = () => {
                                         )}
                                     </div>
 
-                                    {/* بيانات المجموعة عربي وإنجليزي */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         {/* المجموعة بالعربية */}
                                         <div className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
@@ -1044,17 +1431,14 @@ const AddNewMuseumPage = () => {
 
                                             <div>
                                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                                    اسم المجموعة (Name AR){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    اسم المجموعة (Name AR)
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    placeholder="مثال: كنوز الملك توت عنخ آمون"
+                                                    placeholder="مثال: آثار الدولة القديمة"
                                                     className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent"
                                                     value={col.ar.name}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleCollectionFieldChange(
                                                             colIndex,
                                                             "ar",
@@ -1068,17 +1452,14 @@ const AddNewMuseumPage = () => {
                                             <div>
                                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                     وصف المجموعة (Description
-                                                    AR){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    AR)
                                                 </label>
                                                 <textarea
-                                                    rows="2"
+                                                    rows="3"
                                                     placeholder="اكتب وصفاً للمجموعة ومحتوياتها بالعربية..."
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-none"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-y"
                                                     value={col.ar.description}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleCollectionFieldChange(
                                                             colIndex,
                                                             "ar",
@@ -1089,15 +1470,11 @@ const AddNewMuseumPage = () => {
                                                 />
                                             </div>
 
-                                            {/* المقتنيات الفرعية بالعربية (subCollection AR) */}
                                             <div className="pt-2 space-y-2">
                                                 <div className="flex justify-between items-center">
                                                     <label className="text-xs font-semibold text-gray-600">
-                                                        المقتنيات الفرعية
-                                                        (Sub-Collection AR){" "}
-                                                        <span className="text-red-500">
-                                                            *
-                                                        </span>
+                                                        الأقسام الفرعية
+                                                        (Sub-Collection AR)
                                                     </label>
                                                     <button
                                                         type="button"
@@ -1110,7 +1487,7 @@ const AddNewMuseumPage = () => {
                                                         className="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
                                                     >
                                                         <Plus size={12} /> إضافة
-                                                        مقتنى فرعي
+                                                        قسم فرعي
                                                     </button>
                                                 </div>
 
@@ -1123,10 +1500,12 @@ const AddNewMuseumPage = () => {
                                                             >
                                                                 <input
                                                                     type="text"
-                                                                    placeholder={`مقتنى فرعي #${subIndex + 1} (مثال: القناع الذهبي)`}
+                                                                    placeholder={`قسم فرعي #${subIndex + 1} (مثال: التوابيت الحجرية)`}
                                                                     className="flex-1 border border-gray-200 bg-gray-50/50 p-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-accent"
                                                                     value={sub}
-                                                                    onChange={e =>
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
                                                                         handleSubCollectionChange(
                                                                             colIndex,
                                                                             "ar",
@@ -1171,23 +1550,20 @@ const AddNewMuseumPage = () => {
                                             className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3"
                                             dir="ltr"
                                         >
-                                            <div className="text-xs font-bold text-blue-700 border-b pb-2 text-right">
+                                            <div className="text-xs font-bold text-blue-700 border-b pb-2">
                                                 🇬🇧 Collection Details in English
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
-                                                    Collection Name (EN){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                    Collection Name (EN)
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    placeholder="e.g. Treasures of King Tutankhamun"
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent text-left"
+                                                    placeholder="e.g. Old Kingdom Antiquities"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent"
                                                     value={col.en.name}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleCollectionFieldChange(
                                                             colIndex,
                                                             "en",
@@ -1199,18 +1575,15 @@ const AddNewMuseumPage = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
-                                                    Collection Description (EN){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                    Collection Description (EN)
                                                 </label>
                                                 <textarea
-                                                    rows="2"
+                                                    rows="3"
                                                     placeholder="Describe the collection in English..."
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-none text-left"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-y"
                                                     value={col.en.description}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleCollectionFieldChange(
                                                             colIndex,
                                                             "en",
@@ -1221,9 +1594,11 @@ const AddNewMuseumPage = () => {
                                                 />
                                             </div>
 
-                                            {/* المقتنيات الفرعية بالإنجليزية (subCollection EN) */}
                                             <div className="pt-2 space-y-2">
                                                 <div className="flex justify-between items-center">
+                                                    <label className="text-xs font-semibold text-gray-600">
+                                                        Sub-Collection (EN)
+                                                    </label>
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -1237,12 +1612,6 @@ const AddNewMuseumPage = () => {
                                                         <Plus size={12} /> Add
                                                         Sub-item
                                                     </button>
-                                                    <label className="text-xs font-semibold text-gray-600">
-                                                        Sub-Collection (EN){" "}
-                                                        <span className="text-red-500">
-                                                            *
-                                                        </span>
-                                                    </label>
                                                 </div>
 
                                                 <div className="space-y-2">
@@ -1254,10 +1623,12 @@ const AddNewMuseumPage = () => {
                                                             >
                                                                 <input
                                                                     type="text"
-                                                                    placeholder={`Sub-item #${subIndex + 1} (e.g. Golden Mask)`}
-                                                                    className="flex-1 border border-gray-200 bg-gray-50/50 p-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-accent text-left"
+                                                                    placeholder={`Sub-item #${subIndex + 1} (e.g. Stone Sarcophagi)`}
+                                                                    className="flex-1 border border-gray-200 bg-gray-50/50 p-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-accent"
                                                                     value={sub}
-                                                                    onChange={e =>
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
                                                                         handleSubCollectionChange(
                                                                             colIndex,
                                                                             "en",
@@ -1302,13 +1673,13 @@ const AddNewMuseumPage = () => {
                         </div>
                     </div>
 
-                    {/* 4. قسم الفعاليات والمعارض (eventsAndExhibitions) */}
+                    {/* 5. قسم الفعاليات والمعارض (eventsAndExhibitions) */}
                     <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
                             <div className="flex items-center gap-2">
                                 <Calendar className="text-accent" size={22} />
                                 <h2 className="text-xl font-bold text-gray-800">
-                                    4. الفعاليات والمعارض (
+                                    5. الفعاليات والمعارض والأنشطة (
                                     {formData.events.length})
                                 </h2>
                             </div>
@@ -1325,9 +1696,8 @@ const AddNewMuseumPage = () => {
                             {formData.events.map((ev, evIndex) => (
                                 <div
                                     key={ev.id || evIndex}
-                                    className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-3xl relative flex flex-col gap-6 transition-all hover:border-gray-300 shadow-xs"
+                                    className="p-5 sm:p-6 border border-gray-200 bg-gray-50/40 rounded-3xl relative flex flex-col gap-6"
                                 >
-                                    {/* رأس الفعالية */}
                                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
                                         <span className="text-sm font-black text-accent bg-accent/10 px-3.5 py-1.5 rounded-xl">
                                             الفعالية / المعرض رقم #{evIndex + 1}
@@ -1346,7 +1716,6 @@ const AddNewMuseumPage = () => {
                                         )}
                                     </div>
 
-                                    {/* تفاصيل الفعالية عربي وإنجليزي */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         {/* الفعالية بالعربية */}
                                         <div className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
@@ -1358,17 +1727,14 @@ const AddNewMuseumPage = () => {
                                             <div>
                                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                     عنوان الفعالية / المعرض
-                                                    (Title AR){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    (Title AR)
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    placeholder="مثال: معرض الآثار الغارقة المؤقت"
+                                                    placeholder="مثال: المعارض الدائمة / المؤقتة"
                                                     className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent"
                                                     value={ev.ar.title}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleEventFieldChange(
                                                             evIndex,
                                                             "ar",
@@ -1382,17 +1748,14 @@ const AddNewMuseumPage = () => {
                                             <div>
                                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                     وصف الفعالية / المعرض
-                                                    (Description AR){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    (Description AR)
                                                 </label>
                                                 <textarea
-                                                    rows="2"
+                                                    rows="3"
                                                     placeholder="تفاصيل الفعالية أو المعرض بالعربية..."
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-none"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-y"
                                                     value={ev.ar.description}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleEventFieldChange(
                                                             evIndex,
                                                             "ar",
@@ -1409,24 +1772,21 @@ const AddNewMuseumPage = () => {
                                             className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3"
                                             dir="ltr"
                                         >
-                                            <div className="text-xs font-bold text-blue-700 border-b pb-2 text-right">
+                                            <div className="text-xs font-bold text-blue-700 border-b pb-2">
                                                 🇬🇧 Event / Exhibition in English
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">
                                                     Event / Exhibition Title
-                                                    (EN){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    (EN)
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    placeholder="e.g. Sunken Cities Temporary Exhibition"
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent text-left"
+                                                    placeholder="e.g. Permanent & Temporary Exhibitions"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent"
                                                     value={ev.en.title}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleEventFieldChange(
                                                             evIndex,
                                                             "en",
@@ -1438,18 +1798,15 @@ const AddNewMuseumPage = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-600 mb-1 text-right">
-                                                    Event Description (EN){" "}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                                    Event Description (EN)
                                                 </label>
                                                 <textarea
-                                                    rows="2"
+                                                    rows="3"
                                                     placeholder="Event details in English..."
-                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-none text-left"
+                                                    className="w-full border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-accent resize-y"
                                                     value={ev.en.description}
-                                                    onChange={e =>
+                                                    onChange={(e) =>
                                                         handleEventFieldChange(
                                                             evIndex,
                                                             "en",
